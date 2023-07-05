@@ -187,17 +187,43 @@ class Simulation:
 
         
 
-    
 
-    # def __init__(self):
-        # self.currently_watching = False
-        # self.archetype = None   # starts off with no archetype defined
-        # self.agent_id = None # unique identification number for agent
-        # self.log = "" # logs agent history as text
+    """
+
+    Now that we have our agents and videos generated, we can use them to simulate a given day on YouTube.
+    As a reminder, here is what an agent does each day:
+    - Click on a video (they will be provided with a random video at start of day)
+    - Decide to watch the video if it aligns with their archetype parameters (todo: figure out how to code that.
+      Probably just a bunch of checks for each archetype.)
+    - Actually watch the video
+    - Increment the video views
+    - Add the video length to their total time spent watching for today
+    - Flip a coin to determine if a thumbs up is left
+    - If total time spent watching for today is under their archetype's daily limit, find a new video.
+      If over time, stop watching and end the day.
+
+
+    How do users decide to watch a suggested video?
+    ("Suggested" in this context means that a RNG selects that video from our array of 1000 videos to show the user.)
+
+    if rand_next_suggested_video.extremeness is with 0.2 of current video (or within some value range for their archetype)
+        click on next video
+        establish_relationship()
+
+    Continue this above cycle per agent until the total minutes watched exceeds the agent's archetype limit.
+    Repeat all of the above for all agents in a given day.
+
+
+    What is some helpful info to collect from each day (maybe in the form of running totals/global variables)?
+    - How many minutes total watched by all agents
+    - Avg. how many minutes watched per agent (above / 100)
+    - How many videos watched total (count the number of "clicks")
+    - Avg. extremity of all videos watched (maybe by archetype?)
+
+    Also, this may be easier to keep in a Jupyter notebook. We can figure that out eventually.
+
+    """
 
 
 
 
-
-
-    print("hello");
