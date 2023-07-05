@@ -102,6 +102,7 @@ class Simulation:
         # Add the video object to our array of videos
         all_videos.append(random_vid);
     
+
     # Let's make sure this worked.
 
     print("Information for the first three videos:");
@@ -112,6 +113,87 @@ class Simulation:
         print("Extremeness: " + str(all_videos[i].extremeness));
         print("Thumbs up count: " + str(all_videos[i].thumbs_up));
         print("");
+    
+
+
+    # Now that we've generated the videos, we can generate our agents.
+    # Let's start with 100 agents.
+    # This means we will have the following archetype counts:
+    """
+    AGENT_ARCHETYPE_DISTRIBUTION = {
+        "progressive_activist": 8,
+        "traditional_liberal": 11,
+        "passive_liberal": 15,
+        "politically_disengaged": 26,
+        "moderate": 15,
+        "traditional_conservative": 19,
+        "devoted_conservative": 6
+    }    
+    """
+    # So, 8 progressive activists, 11 traditional liberals, 15 passive liberals, 26 politically disengaged,
+    # 15 moderates, 19 traditional conservatives, and 6 devoted conservatives.
+    # Since we have 100 agents, their IDs can just be 1-100 in the order they are created.
+
+    # Creating an array to hold our agents
+    our_agents = [];
+
+    id_counter = 0;
+    # Generate the progressive activists (8)
+    for i in range(8):    
+        our_agent = Agent(False, "progressive_activist", id_counter, "");
+        our_agents.append(our_agent);
+        id_counter += 1;
+
+    # Generate the traditional liberals (11)
+    for i in range(11):
+        our_agent = Agent(False, "traditional_liberal", i, "");
+        our_agents.append(our_agent);
+        id_counter += 1;
+    
+    # Generate the passive liberals (15)
+    for i in range(15):
+        our_agent = Agent(False, "passive_liberal", i, "");
+        our_agents.append(our_agent);
+        id_counter += 1;
+    
+    # Generate the politically disengaged (26)
+    for i in range(26):
+        our_agent = Agent(False, "politically_disengaged", i, "");
+        our_agents.append(our_agent);
+        id_counter += 1;
+    
+    # Generate the moderates (15)
+    for i in range(15):
+        our_agent = Agent(False, "moderate", i, "");
+        our_agents.append(our_agent);
+        id_counter += 1;
+    
+    # Generate the traditional conservatives (19)
+    for i in range(19):
+        our_agent = Agent(False, "traditional_conservative", i, "");
+        our_agents.append(our_agent);
+        id_counter += 1;
+    
+    # Generate the devoted conservatives (6)
+    for i in range(6):
+        our_agent = Agent(False, "devoted_conservatives", i, "");
+        our_agents.append(our_agent);
+        id_counter += 1;
+    
+
+    # Now, let's see if this actually works
+    # for i in range(100):
+    #     print("Count: " + str(our_agents[i].agent_id) + "\tArchetype: " + our_agents[i].archetype);
+
+        
+
+    
+
+    # def __init__(self):
+        # self.currently_watching = False
+        # self.archetype = None   # starts off with no archetype defined
+        # self.agent_id = None # unique identification number for agent
+        # self.log = "" # logs agent history as text
 
 
 

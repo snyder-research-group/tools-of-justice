@@ -6,12 +6,11 @@ from behavior_reference import BEHAVIOR_ARCHETYPE_PARAMETERS
 
 class Agent:
     """ Class which defines agents within the YouTube simulation. Stores agent characteristics, current state and log. """
-    def __init__(self):
-        """  """
-        self.currently_watching = False
-        self.agent_id = None # unique identification number for agent
-        self.state = {} # characterizes agents current status
-        self.log = "" # logs agent history as text
+    def __init__(self, currently_watching, archetype, agent_id, log):
+        self.currently_watching = currently_watching;
+        self.archetype = archetype;   # starts off with no archetype defined
+        self.agent_id = agent_id; # unique identification number for agent
+        self.log = log; # logs agent history as text
 
     def is_watching(self):
         return self.currently_watching
