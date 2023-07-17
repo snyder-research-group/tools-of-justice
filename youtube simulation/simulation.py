@@ -10,6 +10,11 @@ from agent import Agent
 from video import Video
 from activity import Activity
 from behavior_reference import BEHAVIOR_ARCHETYPE_PARAMETERS
+from behavior_reference import AGENT_ARCHETYPE_DISTRIBUTION
+
+NUM_VIDEOS = 1000;
+NUM_AGENTS = 100;
+
 
 class Simulation:
     """Class file for the actual simulation (so far)."""
@@ -46,7 +51,7 @@ class Simulation:
 
     # Generate random view count (views range from 1 to 1 million)
     random_view_counts = []
-    for i in range(1000):
+    for i in range(NUM_VIDEOS):
         r = random.randint(1, 1000000)
         random_view_counts.append(r)
 
@@ -55,7 +60,7 @@ class Simulation:
     # resultant random numbers list
     random_video_ids = []
     # traversing the loop 1000 times
-    for i in range(1000):
+    for i in range(NUM_VIDEOS):
 
         # r=random.randint(1,100000)
         # # checking whether the generated random number is not in the
@@ -67,27 +72,28 @@ class Simulation:
 
     # Generate random video length
     random_vid_lengths = []
-    for i in range(1000):
+    for i in range(NUM_VIDEOS):
         r = random.randint(1, 100)
         random_vid_lengths.append(r)
 
     # Generate random video extremeness
     random_extremeness = []
-    for i in range(1000):
+    for i in range(NUM_VIDEOS):
         r = random.randint(0*0,1*10)/10
         random_extremeness.append(r)
 
 
     # Generate random number of thumbs up
     random_thumbs_up = []
-    for i in range(1000):
+    for i in range(NUM_VIDEOS):
         r = random.randint(0, 50000)
         random_thumbs_up.append(r)
 
 
     # Use the above arrays to create video objects
     all_videos = []
-    for i in range(1000):   # create 1000 videos
+    for i in range(NUM_VIDEOS):   # create 1000 videos
+
 
         # Grab the data points for the video
         views = random_view_counts[i];
@@ -120,7 +126,7 @@ class Simulation:
     # Let's start with 100 agents.
     # This means we will have the following archetype counts:
     """
-    AGENT_ARCHETYPE_DISTRIBUTION = {
+    AGENT_ARCHETYPE_DISTRIBUTION = {    # also make these macros
         "progressive_activist": 8,
         "traditional_liberal": 11,
         "passive_liberal": 15,
@@ -139,51 +145,51 @@ class Simulation:
 
     id_counter = 0;
     # Generate the progressive activists (8)
-    for i in range(8):    
+    for i in range(AGENT_ARCHETYPE_DISTRIBUTION["progressive_activist"]):    
         our_agent = Agent(False, "progressive_activist", id_counter, "");
         our_agents.append(our_agent);
         id_counter += 1;
 
     # Generate the traditional liberals (11)
-    for i in range(11):
+    for i in range(AGENT_ARCHETYPE_DISTRIBUTION["traditional_liberal"]):
         our_agent = Agent(False, "traditional_liberal", i, "");
         our_agents.append(our_agent);
         id_counter += 1;
     
     # Generate the passive liberals (15)
-    for i in range(15):
+    for i in range(AGENT_ARCHETYPE_DISTRIBUTION["passive_liberal"]):
         our_agent = Agent(False, "passive_liberal", i, "");
         our_agents.append(our_agent);
         id_counter += 1;
     
     # Generate the politically disengaged (26)
-    for i in range(26):
+    for i in range(AGENT_ARCHETYPE_DISTRIBUTION["politically_disengaged"]):
         our_agent = Agent(False, "politically_disengaged", i, "");
         our_agents.append(our_agent);
         id_counter += 1;
     
     # Generate the moderates (15)
-    for i in range(15):
+    for i in range(AGENT_ARCHETYPE_DISTRIBUTION["moderate"]):
         our_agent = Agent(False, "moderate", i, "");
         our_agents.append(our_agent);
         id_counter += 1;
     
     # Generate the traditional conservatives (19)
-    for i in range(19):
+    for i in range(AGENT_ARCHETYPE_DISTRIBUTION["traditional_conservative"]):
         our_agent = Agent(False, "traditional_conservative", i, "");
         our_agents.append(our_agent);
         id_counter += 1;
     
     # Generate the devoted conservatives (6)
-    for i in range(6):
-        our_agent = Agent(False, "devoted_conservatives", i, "");
+    for i in range(AGENT_ARCHETYPE_DISTRIBUTION["devoted_conservative"]):
+        our_agent = Agent(False, "devoted_conservative", i, "");
         our_agents.append(our_agent);
         id_counter += 1;
     
 
     # Now, let's see if this actually works
-    # for i in range(100):
-    #     print("Count: " + str(our_agents[i].agent_id) + "\tArchetype: " + our_agents[i].archetype);
+    for i in range(NUM_AGENTS):
+        print("Count: " + str(our_agents[i].agent_id) + "\tArchetype: " + our_agents[i].archetype);
 
         
 
