@@ -111,14 +111,32 @@ class Simulation:
 
     # Let's make sure this worked.
 
-    print("Information for the first three videos:");
-    for i in range(3):
-        print("Views: " + str(all_videos[i].views));
-        print("Video ID: " + str(all_videos[i].vid_id));
-        print("Length: " + str(all_videos[i].length) +  " minutes");
-        print("Extremeness: " + str(all_videos[i].extremeness));
-        print("Thumbs up count: " + str(all_videos[i].thumbs_up));
-        print("");
+    # print("Information for the first three videos:");
+    # for i in range(3):
+    #     print("Views: " + str(all_videos[i].views));
+    #     print("Video ID: " + str(all_videos[i].vid_id));
+    #     # print("Length: " + str(all_videos[i].length) +  " minutes");
+    #     # print("Extremeness: " + str(all_videos[i].extremeness));
+    #     # print("Thumbs up count: " + str(all_videos[i].thumbs_up));
+    #     # print("");
+    
+    # # Let's test the watch function
+    for i in range(10):
+        Activity.watch(all_videos[i])
+
+    
+    
+    # print("");
+
+    # for i in range(3):
+    #     print("Views: " + str(all_videos[i].views));
+    #     print("Video ID: " + str(all_videos[i].vid_id));
+    #     # print("Length: " + str(all_videos[i].length) +  " minutes");
+    #     # print("Extremeness: " + str(all_videos[i].extremeness));
+    #     # print("Thumbs up count: " + str(all_videos[i].thumbs_up));
+    #     # print("");
+
+    
     
 
 
@@ -126,7 +144,7 @@ class Simulation:
     # Let's start with 100 agents.
     # This means we will have the following archetype counts:
     """
-    AGENT_ARCHETYPE_DISTRIBUTION = {    # also make these macros
+    AGENT_ARCHETYPE_DISTRIBUTION = {
         "progressive_activist": 8,
         "traditional_liberal": 11,
         "passive_liberal": 15,
@@ -188,8 +206,8 @@ class Simulation:
     
 
     # Now, let's see if this actually works
-    for i in range(NUM_AGENTS):
-        print("Count: " + str(our_agents[i].agent_id) + "\tArchetype: " + our_agents[i].archetype);
+    # for i in range(NUM_AGENTS):
+    #     print("Count: " + str(our_agents[i].agent_id) + "\tArchetype: " + our_agents[i].archetype);
 
         
 
@@ -215,6 +233,9 @@ class Simulation:
     if rand_next_suggested_video.extremeness is with 0.2 of current video (or within some value range for their archetype)
         click on next video
         establish_relationship()
+    
+        note from 7/18: is this true though??? extremeness would just be one check out of making sure all the archetype limits and such match
+        if the extremeness is okay but the length would push them over, it's a no go
 
     Continue this above cycle per agent until the total minutes watched exceeds the agent's archetype limit.
     Repeat all of the above for all agents in a given day.
@@ -229,6 +250,42 @@ class Simulation:
     Also, this may be easier to keep in a Jupyter notebook. We can figure that out eventually.
 
     """
+
+    # TODO: Write pseudocode for a day, then translate that to actual python
+    # Once the code for a given agent on one day is written, try and have a day run for every single agent
+
+    # for all agents (go through the list or something):
+
+    # - Click on a video (they will be provided with a random video at start of day)
+         # pick a random video from the array of all vidoes (test the function you wrote for this)
+
+    # - Decide to watch the video if it aligns with their archetype parameters (todo: figure out how to code that.
+        # yeah uhh this is probably just a bunch of comparison checks. like go down the list of attributes and if all is good then watch the video
+        # a good next step might be to break down these comparison checks into Really Tiny Pieces. 
+        # because like for example checking if the video length would be too much.
+        # you have to create a temp variable to add the video's length to the day's running total, then call the archetype value (unless its stored with the agent i forgot) to see if this temp value exceeds it, THEN set a boolean flag or whatever
+        # literally like take a sheet of paper and write out exactly what goes into all of these. and hopefully find a better way of doing it lol
+
+    # - Actually watch the video
+        # call the Activity.watch() function
+
+    # - Increment the video views
+        # this happens in Activity.watch()
+
+    # - Add the video length to their total time spent watching for today
+        # ditto above 
+
+    # - Flip a coin to determine if a thumbs up is left
+        # ditto above again
+
+    # - If total time spent watching for today is under their archetype's daily limit, find a new video.
+        # need to create a variable for each agent to track their total minutes watched for the day.
+        # an agent's daily values all need to be initialized to zero. WRITE AN INSTANTIATION FUNC or something similar
+
+    #   If over time, stop watching and end the day.
+
+
+
 
 
 
