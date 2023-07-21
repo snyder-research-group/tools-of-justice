@@ -170,44 +170,45 @@ class Simulation:
 
     # Generate the traditional liberals (11)
     for i in range(AGENT_ARCHETYPE_DISTRIBUTION["traditional_liberal"]):
-        our_agent = Agent(False, "traditional_liberal", i, "");
+        our_agent = Agent(False, "traditional_liberal", id_counter, "");
         our_agents.append(our_agent);
         id_counter += 1;
     
     # Generate the passive liberals (15)
     for i in range(AGENT_ARCHETYPE_DISTRIBUTION["passive_liberal"]):
-        our_agent = Agent(False, "passive_liberal", i, "");
+        our_agent = Agent(False, "passive_liberal", id_counter, "");
         our_agents.append(our_agent);
         id_counter += 1;
     
     # Generate the politically disengaged (26)
     for i in range(AGENT_ARCHETYPE_DISTRIBUTION["politically_disengaged"]):
-        our_agent = Agent(False, "politically_disengaged", i, "");
+        our_agent = Agent(False, "politically_disengaged", id_counter, "");
         our_agents.append(our_agent);
         id_counter += 1;
     
     # Generate the moderates (15)
     for i in range(AGENT_ARCHETYPE_DISTRIBUTION["moderate"]):
-        our_agent = Agent(False, "moderate", i, "");
+        our_agent = Agent(False, "moderate", id_counter, "");
         our_agents.append(our_agent);
         id_counter += 1;
     
     # Generate the traditional conservatives (19)
     for i in range(AGENT_ARCHETYPE_DISTRIBUTION["traditional_conservative"]):
-        our_agent = Agent(False, "traditional_conservative", i, "");
+        our_agent = Agent(False, "traditional_conservative", id_counter, "");
         our_agents.append(our_agent);
         id_counter += 1;
     
     # Generate the devoted conservatives (6)
     for i in range(AGENT_ARCHETYPE_DISTRIBUTION["devoted_conservative"]):
-        our_agent = Agent(False, "devoted_conservative", i, "");
+        our_agent = Agent(False, "devoted_conservative", id_counter, "");
         our_agents.append(our_agent);
         id_counter += 1;
     
 
+    
     # Now, let's see if this actually works
-    # for i in range(NUM_AGENTS):
-    #     print("Count: " + str(our_agents[i].agent_id) + "\tArchetype: " + our_agents[i].archetype);
+    for i in range(NUM_AGENTS):
+        print("Agent ID: " + str(our_agents[i].agent_id) + "\tArchetype: " + our_agents[i].archetype);
 
         
 
