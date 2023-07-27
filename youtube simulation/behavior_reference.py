@@ -58,16 +58,16 @@ BEHAVIOR_ARCHETYPE_PARAMETERS = {
         "yt_time_threshold": 50,        #will spend 50 minutes per day on YouTube
         "political_affiliation": "middle",
         "video_extremity": 0.6,         #will not watch anything too extreme  
-        "popularity_threshold": 100000  #watches videos with at least 100k views
+        "popularity_threshold": 10000  #watches videos with at least 100k views
     },
 
     # Agent doesn't want to watch long videos. Will engage with popular, non-partisan content.
     "politically_disengaged": {
-        "longest_vid_threshold": 15,    #won't watch any video longer than 15 minutes
+        "longest_vid_threshold": 30,    #won't watch any video longer than 15 minutes
         "yt_time_threshold": 40,        #will spend at most 40 minutes per day on YouTube (national average)
         "political_affiliation": "middle",
         "video_extremity": 0.5,         #does not want to watch videos that are extreme or partisan
-        "popularity_threshold": 500000  #watches more popular videos; at least 500k views
+        "popularity_threshold": 10000  #watches more popular videos; at least 500k views
     },
 
     # Agent will spend a little longer than average watching videos, but nothing incredibly extreme.
@@ -76,7 +76,7 @@ BEHAVIOR_ARCHETYPE_PARAMETERS = {
         "yt_time_threshold": 50,        #will spend 50 minutes per day on YouTube
         "political_affiliation": "middle",
         "video_extremity": 0.4,         #will not watch anything too extreme  
-        "popularity_threshold": 100000  #watches videos with at least 100k views
+        "popularity_threshold": 50000  #watches videos with at least 50k views
     },
 
     # Agent is willing to watch longer videos aligned with their beliefs, but not as long as the devoted conservative.
@@ -85,7 +85,7 @@ BEHAVIOR_ARCHETYPE_PARAMETERS = {
         "yt_time_threshold": 60,        #will spend up to one hour per day on YouTube   
         "political_affiliation": "right",
         "video_extremity": 0.2,         #will watch some extreme videos, but not much
-        "popularity_threshold": 50000   #will watch any video with at least 50,000 views
+        "popularity_threshold": 10000   #will watch any video with at least 50,000 views
     },
 
     # Agent is willing to spend lots of time watching more "underground" and less-popular videos, for longer.

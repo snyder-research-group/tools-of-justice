@@ -37,10 +37,10 @@ class Activity:
         coin_flip = random.choice([0,1])
         if(coin_flip):
             Activity.give_thumbs_up(video)
-            print("Thumbs up given")
+            # print("Thumbs up given")
             # thumbs_up_given_today += 1
-        else:
-            print("No thumbs up given")
+        # else:
+            # print("No thumbs up given")
             # thumbs_up_skipped_today += 1
 
         # print(thumbs_up_given_today)
