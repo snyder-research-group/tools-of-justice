@@ -1,12 +1,12 @@
 # These percentages are lifted directly from https://hiddentribes.us/.
 AGENT_ARCHETYPE_DISTRIBUTION = {
-    "progressive_activist": 8,
-    "traditional_liberal": 11,
-    "passive_liberal": 15,
-    "politically_disengaged": 26,
-    "moderate": 15,
-    "traditional_conservative": 19,
-    "devoted_conservative": 6
+    "progressive_activist": 0.08,
+    "traditional_liberal": 0.11,
+    "passive_liberal": 0.15,
+    "politically_disengaged": 0.26,
+    "moderate": 0.15,
+    "traditional_conservative": .19,
+    "devoted_conservative": 0.06
 }
 
 
@@ -49,7 +49,7 @@ BEHAVIOR_ARCHETYPE_PARAMETERS = {
         "yt_time_threshold": 80,        #will spend up to one hour per day on YouTube   
         "political_affiliation": "left",
         "video_extremity": 0.8,         #will watch some extreme videos, but not much
-        "popularity_threshold": 50000   #will watch any video with at least 10,000 views
+        "popularity_threshold": 50000   #will watch any video with at least 50,000 views
     },
 
     # Agent will spend a little longer than average watching videos, but nothing incredibly extreme.
@@ -63,8 +63,8 @@ BEHAVIOR_ARCHETYPE_PARAMETERS = {
 
     # Agent doesn't want to watch long videos. Will engage with popular, non-partisan content.
     "politically_disengaged": {
-        "longest_vid_threshold": 30,    #won't watch any video longer than 15 minutes
-        "yt_time_threshold": 60,        #will spend at most 40 minutes per day on YouTube (national average)
+        "longest_vid_threshold": 15,    #won't watch any video longer than 15 minutes
+        "yt_time_threshold": 45,        #will spend at most 40 minutes per day on YouTube (national average)
         "political_affiliation": "middle",
         "video_extremity": 0.5,         #does not want to watch videos that are extreme or partisan
         "popularity_threshold": 500000  #watches more popular videos; at least 500k views
@@ -85,7 +85,7 @@ BEHAVIOR_ARCHETYPE_PARAMETERS = {
         "yt_time_threshold": 80,        #will spend up to one hour per day on YouTube   
         "political_affiliation": "right",
         "video_extremity": 0.2,         #will watch some extreme videos, but not much
-        "popularity_threshold": 50000   #will watch any video with at least 10,000 views
+        "popularity_threshold": 50000   #will watch any video with at least 50,000 views
     },
 
     # Agent is willing to spend lots of time watching more "underground" and less-popular videos, for longer.
