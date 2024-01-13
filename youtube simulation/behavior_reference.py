@@ -10,6 +10,17 @@ AGENT_ARCHETYPE_DISTRIBUTION = {
 }
 
 
+
+import random as random
+from random import randint
+
+rand_video_threshold = randint(15,90)
+rand_yt_time_threshold = randint(45,120)
+affiliations = ['left', 'right', 'middle']
+rand_political_affiliation = random.choice(affiliations)
+rand_video_extremity = random.random()
+rand_popularity_threshold = randint(2000,500000)
+
 # Parameters describing behavior of Agent Archetypes
 # Parameters
     # longest_vid_threshold: longest video length (in minutes) that user is willing to watch
@@ -97,6 +108,10 @@ BEHAVIOR_ARCHETYPE_PARAMETERS = {
         "video_extremity": 0.0,         #will watch videos that rate high on extreme-ness
         "popularity_threshold": 2000   #will watch any video with at least 2000 views
     },
-    
+
+
+
+
+
 
 }
