@@ -107,7 +107,19 @@ BEHAVIOR_ARCHETYPE_PARAMETERS = {
         "political_affiliation": "right",
         "video_extremity": 0.0,         #will watch videos that rate high on extreme-ness
         "popularity_threshold": 2000   #will watch any video with at least 2000 views
-    },
+    }
+
+    # # Agent is willing to spend lots of time watching more "underground" and less-popular videos, for longer.
+    # # More "devoted" to watching videos aligned with their beliefs.
+    # "random_archetype": {
+    #     "longest_vid_threshold": rand_video_threshold,   #will watch videos up to 1.5 hours long
+    #     "yt_time_threshold": rand_yt_time_threshold,       #will spend up to two hours on YouTube per day
+    #     "political_affiliation":  rand_political_affiliation,
+    #     "video_extremity": rand_video_extremity,         #will watch videos that rate high on extreme-ness
+    #     "popularity_threshold": rand_popularity_threshold   #will watch any video with at least 2000 views
+    # }
+
+
 
 
 
