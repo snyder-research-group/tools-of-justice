@@ -2356,32 +2356,35 @@ if(SCORE_SYSTEM_TOGGLE):
     # plt.plot(x_score, m_score*x_score+b_score)
 
 
-plt.text(0.4, numpy.nanmean(y1)+0.2, "Avg: " + str(numpy.nanmean(y1)), fontsize = 10)
-plt.text(0.4, numpy.nanmean(y_score1)-0.2, "Score Avg: " + str(numpy.nanmean(y_score1)), fontsize = 10)
+# plt.text(0.4, numpy.nanmean(y1)+0.2, "Avg: " + str(numpy.nanmean(y1)), fontsize = 10)
+# plt.text(0.4, numpy.nanmean(y_score1)-0.2, "Score Avg: " + str(numpy.nanmean(y_score1)), fontsize = 10)
+
+colors = ["red", "coral", "orange", "gold", "yellow", "yellowgreen", "limegreen", "dodgerblue", "royalblue", "mediumpurple", "rebeccapurple"]
 
 if(var_to_test == "gamma"):
     for g in range(len(gamma_values)):
         gamma_x = gamma_lines_extr[g][0]
         gamma_y = gamma_lines_extr[g][1]
-        sns.regplot(x = gamma_x, y = gamma_y, lowess=True, scatter = False, label = gamma_values[g])
+        sns.regplot(x = gamma_x, y = gamma_y, lowess=True, scatter = False, label = gamma_values[g], color = colors[g])
 
 elif(var_to_test == "alpha"):
     for a in range(len(alpha_values)):
         alpha_x = alpha_lines_extr[a][0]
         alpha_y = alpha_lines_extr[a][1]
-        sns.regplot(x = alpha_x, y = alpha_y, lowess=True, scatter = False, label = alpha_values[a])
+        sns.regplot(x = alpha_x, y = alpha_y, lowess=True, scatter = False, label = alpha_values[a], color = colors[a])
+        
 
 elif(var_to_test == "beta"):
     for b in range(len(beta_values)):
         beta_x = beta_lines_extr[b][0]
         beta_y = beta_lines_extr[b][1]
-        sns.regplot(x = beta_x, y = beta_y, lowess=True, scatter = False, label = beta_values[b])
+        sns.regplot(x = beta_x, y = beta_y, lowess=True, scatter = False, label = beta_values[b], color = colors[b])
 
 elif(var_to_test == "delta"):
     for d in range(len(delta_values)):
         delta_x = delta_lines_extr[d][0]
         delta_y = delta_lines_extr[d][1]
-        sns.regplot(x = delta_x, y = delta_y, lowess=True, scatter = False, label = delta_values[d])
+        sns.regplot(x = delta_x, y = delta_y, lowess=True, scatter = False, label = delta_values[d], color = colors[d])
 
 
 
@@ -2390,7 +2393,9 @@ plt.title('Avg. Extremeness of Videos Watched Per Agent, By Extremeness, var = '
 # # sns.regplot(x = x_rec, y = y_rec, lowess=True, scatter = False, label = "Rec", line_kws={"color": "royalblue"})
 # # sns.regplot(x = x_rand, y = y_rand, lowess=True, scatter = False, label = "Rand", line_kws={"color": "cornflowerblue"})
 # sns.regplot(x = x_score1, y = y_score1, lowess=True, scatter = False, label = "Score", line_kws={"color": "powderblue"})
-plt.legend(labels=['None', '0.0', '0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1.0'], loc='upper right')
+plt.legend(loc='upper right')
+ax = plt.gca()
+leg = ax.get_legend()
 
 plt.show()
 
