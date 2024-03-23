@@ -2479,6 +2479,10 @@ sns.regplot(x = x1, y = y1, lowess=True, scatter = False, label = "None", line_k
 # sns.regplot(x = x_rand, y = y_rand, lowess=True, scatter = False, label = "Rand", line_kws={"color": "cornflowerblue"})
 sns.regplot(x = x_score1, y = y_score1, lowess=True, scatter = False, label = "Score", line_kws={"color": "powderblue"})
 plt.legend(labels=['None', 'Score'])
+ax = plt.gca()
+leg = ax.get_legend()
+leg.legendHandles[0].set_color('midnightblue')
+leg.legendHandles[1].set_color('powderblue')
 
 plt.show()
 
@@ -2552,7 +2556,11 @@ sns.regplot(x = x2, y = y2, lowess=True, scatter = False, label = "None", line_k
 sns.regplot(x = x_score2, y = y_score2, lowess=True, scatter = False, label = "Score", line_kws={"color": "powderblue"})
 plt.text(0.3, numpy.nanmean(y2)+4, "Avg: " + str(numpy.nanmean(y2)), fontsize = 10)
 plt.text(0.6, numpy.nanmean(y_score2)-5, "Score Avg: " + str(numpy.nanmean(y_score2)), fontsize = 10)
-plt.legend(labels=['None', 'Rec', 'Rand', 'Score'])
+plt.legend(labels=['None', 'Score'])
+ax = plt.gca()
+leg = ax.get_legend()
+leg.legendHandles[0].set_color('midnightblue')
+leg.legendHandles[1].set_color('powderblue')
 
 plt.show()
 plt.close()
@@ -2625,7 +2633,11 @@ sns.regplot(x = x3, y = y3, lowess=True, scatter = False, label = "None", line_k
 # sns.regplot(x = x_rec, y = y_rec, lowess=True, scatter = False, label = "Rec", line_kws={"color": "royalblue"})
 # sns.regplot(x = x_rand, y = y_rand, lowess=True, scatter = False, label = "Rand", line_kws={"color": "cornflowerblue"})
 sns.regplot(x = x_score3, y = y_score3, lowess=True, scatter = False, label = "Score", line_kws={"color": "powderblue"})
-plt.legend(labels=['None', 'Rec', 'Rand', 'Score'])
+plt.legend(labels=['None', 'Score'])
+ax = plt.gca()
+leg = ax.get_legend()
+leg.legendHandles[0].set_color('midnightblue')
+leg.legendHandles[1].set_color('powderblue')
 
 plt.close() # clear the plot
 
@@ -2694,7 +2706,11 @@ sns.regplot(x = x4, y = y4, lowess=True, scatter = False, label = "None", line_k
 sns.regplot(x = x_score4, y = y_score4, lowess=True, scatter = False, label = "Score", line_kws={"color": "powderblue"})
 plt.text(0.4, numpy.nanmean(y4)-0.25, "Avg: " + str(numpy.nanmean(y4)), fontsize = 10)
 plt.text(0.4, 4, "Score Avg: " + str(numpy.nanmean(y_score4)), fontsize = 10)
-plt.legend(labels=['None', 'Rec', 'Random', 'Score'])
+plt.legend(labels=['None', 'Score'])
+ax = plt.gca()
+leg = ax.get_legend()
+leg.legendHandles[0].set_color('midnightblue')
+leg.legendHandles[1].set_color('powderblue')
 
 plt.show()
 plt.close()
