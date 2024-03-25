@@ -535,6 +535,7 @@ if(var_to_test == "alpha"):
 
     # Added 3/25/24
     alpha_lines_lens = []
+    alpha_lines_pops = []
 
 
     for a in range(len(alpha_values)):  # runs for each alpha value
@@ -640,6 +641,9 @@ if(var_to_test == "alpha"):
         x_agent_len_thresholds = [] # will hold the longest length each agent will watch
         y_agent_avg_len_watched  = [] # will hold the average length each agent watches
 
+        x_agent_pop_thresholds = []
+        y_agent_avg_pop_watched = []
+
 
 
         '''
@@ -660,7 +664,10 @@ if(var_to_test == "alpha"):
             agent_number = daily_agent.agent_id
             extr_of_each_agent_video = []
             daily_agent_archetype = daily_agent.archetype
+
+            # Added 3/25/24
             daily_agent_lens = []
+            daily_agent_pops = []
 
             # These two need to be declared OUTSIDE of the run for each video.
             # So, declare them within the day for a given agent, but OUTSIDE of the actual video selection checking loop.
@@ -682,6 +689,7 @@ if(var_to_test == "alpha"):
 
             # Added 3/25/24
             x_agent_len_thresholds.append(daily_agent_longest_vid)
+            x_agent_pop_thresholds.append(daily_agent_pop_thresh)
 
             
             our_agents_videos = all_videos
@@ -775,6 +783,7 @@ if(var_to_test == "alpha"):
 
                 # Added 3/25/24
                 daily_agent_lens.append(suggested_video.length)
+                daily_agent_pops.append(suggested_video.views)
 
                 agent_minutes_watched_today = agent_minutes_watched_today + suggested_video.length
                 agent_vids_watched_today = agent_vids_watched_today + 1
@@ -952,6 +961,7 @@ if(var_to_test == "alpha"):
 
                     # Added 3/25/24
                     daily_agent_lens.append(suggested_video.length)
+                    daily_agent_pops.append(suggested_video.views)
 
                     agent_minutes_watched_today_scoring = agent_minutes_watched_today_scoring + suggested_video.length
                     agent_vids_watched_today_scoring = agent_vids_watched_today_scoring + 1 
@@ -971,6 +981,7 @@ if(var_to_test == "alpha"):
 
                 # Added 3/25/24: records this agent's average length watched
                 y_agent_avg_len_watched.append(mean(daily_agent_lens))
+                y_agent_avg_pop_watched.append(mean(daily_agent_pops))
                 
                 
                 # This array needs to get the extremeness threshold of each agent
@@ -997,6 +1008,9 @@ if(var_to_test == "alpha"):
         ## For the alpha graph
         alpha_lines_lens.append([x_agent_len_thresholds, y_agent_avg_len_watched])
 
+        ## For the beta graph
+        alpha_lines_pops.append([x_agent_pop_thresholds, y_agent_avg_pop_watched])
+
 
 
 
@@ -1010,6 +1024,7 @@ elif(var_to_test == "gamma"):
 
     # Added 3/25/24
     gamma_lines_lens = []
+    gamma_lines_pops = []
 
 
     for g in range(len(gamma_values)):  # runs for each gamma value
@@ -1115,6 +1130,9 @@ elif(var_to_test == "gamma"):
         x_agent_len_thresholds = [] # will hold the longest length each agent will watch
         y_agent_avg_len_watched  = [] # will hold the average length each agent watches
 
+        x_agent_pop_thresholds = []
+        y_agent_avg_pop_watched = []
+
 
 
         '''
@@ -1136,6 +1154,7 @@ elif(var_to_test == "gamma"):
             extr_of_each_agent_video = []
             daily_agent_archetype = daily_agent.archetype
             daily_agent_lens = []
+            daily_agent_pops = []
 
             # These two need to be declared OUTSIDE of the run for each video.
             # So, declare them within the day for a given agent, but OUTSIDE of the actual video selection checking loop.
@@ -1157,6 +1176,7 @@ elif(var_to_test == "gamma"):
 
             # Added 3/25/24
             x_agent_len_thresholds.append(daily_agent_longest_vid)
+            x_agent_pop_thresholds.append(daily_agent_pop_thresh)
 
             
             our_agents_videos = all_videos
@@ -1250,6 +1270,7 @@ elif(var_to_test == "gamma"):
 
                 # Added 3/25/24
                 daily_agent_lens.append(suggested_video.length)
+                daily_agent_pops.append(suggested_video.views)
 
                 agent_minutes_watched_today = agent_minutes_watched_today + suggested_video.length
                 agent_vids_watched_today = agent_vids_watched_today + 1
@@ -1427,6 +1448,7 @@ elif(var_to_test == "gamma"):
 
                     # Added 3/25/24
                     daily_agent_lens.append(suggested_video.length)
+                    daily_agent_pops.append(suggested_video.views)
 
                     agent_minutes_watched_today_scoring = agent_minutes_watched_today_scoring + suggested_video.length
                     agent_vids_watched_today_scoring = agent_vids_watched_today_scoring + 1 
@@ -1446,6 +1468,7 @@ elif(var_to_test == "gamma"):
 
                 # Added 3/25/24: records this agent's average length watched
                 y_agent_avg_len_watched.append(mean(daily_agent_lens))
+                y_agent_avg_pop_watched.append(mean(daily_agent_pops))
                 
                 
                 # This array needs to get the extremeness threshold of each agent
@@ -1469,8 +1492,12 @@ elif(var_to_test == "gamma"):
         #x3 (vids watched graph)
         gamma_lines_min.append([Reverse(agent_extremeness_array), Reverse(agent_vids_watched_today_array_scoring)])
 
+        # Added 3/25/24
         ## For the gamma graph
         gamma_lines_lens.append([x_agent_len_thresholds, y_agent_avg_len_watched])
+
+        ## For the beta graph
+        gamma_lines_pops.append([x_agent_pop_thresholds, y_agent_avg_pop_watched])
 
 
 
@@ -1482,6 +1509,7 @@ elif(var_to_test == "beta"):
 
     # Added 3/25/24
     beta_lines_lens = []
+    beta_lines_pops = []
 
 
     for b in range(len(beta_values)):  # runs for each beta value
@@ -1587,6 +1615,9 @@ elif(var_to_test == "beta"):
         x_agent_len_thresholds = [] # will hold the longest length each agent will watch
         y_agent_avg_len_watched  = [] # will hold the average length each agent watches
 
+        x_agent_pop_thresholds = []
+        y_agent_avg_pop_watched = []
+
 
 
         '''
@@ -1607,7 +1638,10 @@ elif(var_to_test == "beta"):
             agent_number = daily_agent.agent_id
             extr_of_each_agent_video = []
             daily_agent_archetype = daily_agent.archetype
+            
+            # Added 3/25/24
             daily_agent_lens = []
+            daily_agent_pops = []
 
             # These two need to be declared OUTSIDE of the run for each video.
             # So, declare them within the day for a given agent, but OUTSIDE of the actual video selection checking loop.
@@ -1629,6 +1663,7 @@ elif(var_to_test == "beta"):
 
             # Added 3/25/24
             x_agent_len_thresholds.append(daily_agent_longest_vid)
+            x_agent_pop_thresholds.append(daily_agent_pop_thresh)
 
             
             our_agents_videos = all_videos
@@ -1722,6 +1757,7 @@ elif(var_to_test == "beta"):
 
                 # Added 3/25/24
                 daily_agent_lens.append(suggested_video.length)
+                daily_agent_pops.append(suggested_video.views)
 
                 agent_minutes_watched_today = agent_minutes_watched_today + suggested_video.length
                 agent_vids_watched_today = agent_vids_watched_today + 1
@@ -1899,6 +1935,7 @@ elif(var_to_test == "beta"):
 
                     # Added 3/25/24
                     daily_agent_lens.append(suggested_video.length)
+                    daily_agent_pops.append(suggested_video.views)
 
                     agent_minutes_watched_today_scoring = agent_minutes_watched_today_scoring + suggested_video.length
                     agent_vids_watched_today_scoring = agent_vids_watched_today_scoring + 1 
@@ -1918,6 +1955,7 @@ elif(var_to_test == "beta"):
 
                 # Added 3/25/24: records this agent's average length watched
                 y_agent_avg_len_watched.append(mean(daily_agent_lens))
+                y_agent_avg_pop_watched.append(mean(daily_agent_pops))
                 
                 
                 # This array needs to get the extremeness threshold of each agent
@@ -1944,6 +1982,9 @@ elif(var_to_test == "beta"):
         ## For the alpha graph
         beta_lines_lens.append([x_agent_len_thresholds, y_agent_avg_len_watched])
 
+        # For the beta graph
+        beta_lines_pops.append([x_agent_pop_thresholds, y_agent_avg_pop_watched])
+
 
 
 
@@ -1955,6 +1996,7 @@ elif(var_to_test == "delta"):
 
     # Added 3/25/24
     delta_lines_lens = []
+    delta_lines_pops = []
 
 
     for d in range(len(delta_values)):  # runs for each delta value
@@ -2060,6 +2102,9 @@ elif(var_to_test == "delta"):
         x_agent_len_thresholds = [] # will hold the longest length each agent will watch
         y_agent_avg_len_watched  = [] # will hold the average length each agent watches
 
+        x_agent_pop_thresholds = []
+        y_agent_avg_pop_watched = []
+
 
 
         '''
@@ -2080,7 +2125,10 @@ elif(var_to_test == "delta"):
             agent_number = daily_agent.agent_id
             extr_of_each_agent_video = []
             daily_agent_archetype = daily_agent.archetype
+
+            # Added 3/25/24
             daily_agent_lens = []
+            daily_agent_pops = []
 
             # These two need to be declared OUTSIDE of the run for each video.
             # So, declare them within the day for a given agent, but OUTSIDE of the actual video selection checking loop.
@@ -2102,6 +2150,7 @@ elif(var_to_test == "delta"):
 
             # Added 3/25/24
             x_agent_len_thresholds.append(daily_agent_longest_vid)
+            x_agent_pop_thresholds.append(daily_agent_pop_thresh)
 
             
             our_agents_videos = all_videos
@@ -2195,6 +2244,7 @@ elif(var_to_test == "delta"):
 
                 # Added 3/25/24
                 daily_agent_lens.append(suggested_video.length)
+                daily_agent_pops.append(suggested_video.views)
 
                 agent_minutes_watched_today = agent_minutes_watched_today + suggested_video.length
                 agent_vids_watched_today = agent_vids_watched_today + 1
@@ -2372,6 +2422,7 @@ elif(var_to_test == "delta"):
 
                     # Added 3/25/24
                     daily_agent_lens.append(suggested_video.length)
+                    daily_agent_pops.append(suggested_video.views)
 
                     agent_minutes_watched_today_scoring = agent_minutes_watched_today_scoring + suggested_video.length
                     agent_vids_watched_today_scoring = agent_vids_watched_today_scoring + 1 
@@ -2391,7 +2442,7 @@ elif(var_to_test == "delta"):
 
                 # Added 3/25/24: records this agent's average length watched
                 y_agent_avg_len_watched.append(mean(daily_agent_lens))
-                
+                y_agent_avg_pop_watched.append(mean(daily_agent_pops))
                 
                 # This array needs to get the extremeness threshold of each agent
             
@@ -2414,8 +2465,11 @@ elif(var_to_test == "delta"):
         #x3 (vids watched graph)
         delta_lines_min.append([Reverse(agent_extremeness_array), Reverse(agent_vids_watched_today_array_scoring)])
 
-        ## For the delta graph
+        ## For the alpha graph
         delta_lines_lens.append([x_agent_len_thresholds, y_agent_avg_len_watched])
+
+        # For the beta graph
+        delta_lines_pops.append([x_agent_pop_thresholds, y_agent_avg_pop_watched])
 
 
 
@@ -2509,6 +2563,73 @@ leg = ax.get_legend()
 plt.show()
 plt.close()
 # END ALPHA GRAPH
+
+
+# BETA GRAPH #
+
+import matplotlib as matplotlib
+import pandas as pd
+
+
+
+if(SCORE_SYSTEM_TOGGLE):
+    
+    x_score1_betagraph = x_agent_pop_thresholds
+    y_score1_betagraph = y_agent_avg_pop_watched
+
+    # plt.scatter(x_score1_betagraph,y_score1_betagraph, color = 'white')
+    # plt.title('Avg. Extremeness of Videos Watched Per Agent, w/ Scoring', fontsize = 18)
+    plt.xlabel('Agent Thresholds view count')
+    plt.ylabel('Avg. Popularity of Video Watched (# of views)')
+
+
+colors = ["red", "coral", "orange", "gold", "yellow", "yellowgreen", "limegreen", "dodgerblue", "royalblue", "mediumpurple", "rebeccapurple"]
+
+if(var_to_test == "gamma"):
+    for g in range(len(gamma_values)):
+        gamma_x = gamma_lines_pops[g][0]
+        gamma_y = gamma_lines_pops[g][1]
+        sns.regplot(x = gamma_x, y = gamma_y, lowess=True, scatter = False, label = gamma_values[g], color = colors[g])
+
+elif(var_to_test == "alpha"):
+    for a in range(len(alpha_values)):
+        alpha_x = alpha_lines_pops[a][0]
+        alpha_y = alpha_lines_pops[a][1]
+        sns.regplot(x = alpha_x, y = alpha_y, lowess=True, scatter = False, label = alpha_values[a], color = colors[a])
+        
+
+elif(var_to_test == "beta"):
+    for b in range(len(beta_values)):
+        beta_x = beta_lines_pops[b][0]
+        beta_y = beta_lines_pops[b][1]
+        sns.regplot(x = beta_x, y = beta_y, lowess=True, scatter = False, label = beta_values[b], color = colors[b])
+
+elif(var_to_test == "delta"):
+    for d in range(len(delta_values)):
+        delta_x = delta_lines_pops[d][0]
+        delta_y = delta_lines_pops[d][1]
+        sns.regplot(x = delta_x, y = delta_y, lowess=True, scatter = False, label = delta_values[d], color = colors[d])
+
+
+
+plt.title('Avg. Popularity of Vids Watched, By Agent Pop Threshold, var = ' + var_to_test, fontsize = 18)
+# sns.regplot(x = x1_betagraph, y = y1_betagraph, lowess=True, scatter = False, label = "None", line_kws={"color": "midnightblue"})
+# # sns.regplot(x = x_rec, y = y_rec, lowess=True, scatter = False, label = "Rec", line_kws={"color": "royalblue"})
+# # sns.regplot(x = x_rand, y = y_rand, lowess=True, scatter = False, label = "Rand", line_kws={"color": "cornflowerblue"})
+# sns.regplot(x = x_score1_betagraph, y = y_score1_betagraph, lowess=True, scatter = False, label = "Score", line_kws={"color": "powderblue"})
+plt.legend(loc='upper right')
+ax = plt.gca()
+leg = ax.get_legend()
+
+plt.show()
+plt.close()
+# END ALPHA GRAPH
+
+
+
+
+# END BETA GRAPH #
+
 
 
 
