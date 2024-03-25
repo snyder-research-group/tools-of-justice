@@ -393,10 +393,10 @@ def calculate_score_multiple_vids(our_agent, our_videos):
         e_return = ev
 
         #added 2/12/24: making sure delta rewards videos on both extreme ends
-        # if((ev <= 0.2) or (ev >= 0.8)):
-        #     e_return = 0.5
-        # else:
-        #     e_return = 0
+        if((ev <= 0.2) or (ev >= 0.8)):
+            e_return = 0.625
+        else:
+            e_return = 0
 
 
 
@@ -526,453 +526,15 @@ GAMMA_WEIGHT = 0.5     # weight placed on video alignment (how similar extremene
 DELTA_WEIGHT = 0.15    # weight placed on extremeness of the video
 
 
-if(var_to_test == "gamma"):
 
-    gamma_values = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-    gamma_lines_extr = []    # needs to hold the xy values (x_score and y_score)
-    gamma_lines_min = []
-    gamma_lines_vids = []
-
-
-    for g in range(len(gamma_values)):  # runs for each gamma value
-        print("gamma: " + str(gamma_values[g]))
-
-        # need to pass each of these gamma values into the simulation
-        # and then put x_score and y_score into a 2D array so those tuples can be graphed (all on the same graph)
-
-        def calculate_score_multiple_vids_test(our_agent, our_videos, alpha, beta, gamma, delta):
-            alpha = alpha     # weight placed on video length
-            beta = beta     # weight placed on video popularity
-            gamma = gamma     # weight placed on video alignment (how similar extremeness is to user's)
-            delta = delta    # weight placed on extremeness of the video
-
-            our_agent_archetype = our_agent.archetype
-            agent_number = our_agent.agent_id
-
-            video_scores = []
-
-            # Max values for the video qualities
-            max_length = 80
-            max_pop = 1000000
-            max_align = 1
-            max_extr = 1
-
-            daily_agent_longest_vid = archetypes_list[agent_number]["longest_vid_threshold"]
-            daily_agent_yt_threshold = archetypes_list[agent_number]["yt_time_threshold"]
-            daily_agent_pol_aff = archetypes_list[agent_number]["political_affiliation"]
-            daily_agent_vid_extr = archetypes_list[agent_number]["video_extremity"]
-            daily_agent_pop_thresh = archetypes_list[agent_number]["popularity_threshold"]
-
-
-            for i in range(NUM_VIDEOS):
-                # Length values
-                our_video = our_videos[i]
-                l_return = 0  # return value now that we're using a threshold
-                lv = our_video.length
-                la = archetypes_list[agent_number]["longest_vid_threshold"]
-                # agents favor shorter videos. so if lv is > la above the length, give a 0. if lv<la, a 1 or something scaled appropriately.
-                if(lv > la):    # video length is greater than our archetype's preference
-                    l_return = 0
-                else:
-                    # l_return = lv / max_length
-                    l_return = 1
-
-                # wants videos below threshold---we want the value to be bigger, so this one gets a minus
-
-                # Popularity values
-                p_return = -1
-                pv = our_video.views
-                pa = archetypes_list[agent_number]["popularity_threshold"]
-                # logging.debug(print("pv: " + str(pv) + " vs pa: " + str(pa)))
-                # make 0 if below threshold, but scaled appropriately if above
-                # instead of the abs it;ll be either a zero or a positive number, keep the minus sign
-                if(pv < pa): # video popularity is less than our archetype's preference
-                    # logging.debug(print("pv<a"))
-                    p_return = 0
-                else:
-                    # logging.debug(print("pv>pa"))
-                    p_return = 1
-                    # p_return = pv / max_pop
-                
-                
-                # Extremeness values
-                ev = our_video.extremeness
-                ea = archetypes_list[agent_number]["video_extremity"]
-                e_return = ev
-
-                #added 2/12/24: making sure delta rewards videos on both extreme ends
-                # if((ev <= 0.2) or (ev >= 0.8)):
-                #     e_return = 0.5
-                # else:
-                #     e_return = 0
-
-                # For small score = good, + in front of components user wants small, and - for components user wants big
-                # + in front of component that YouTube wants small
-                score = -(alpha * l_return) - (beta * p_return) + (gamma * (abs(ev-ea)/max_align)) - (delta * e_return)/max_extr
-
-                video_scores.append((i, score))
-
-            # Freeze 1 row, then sort by second column.
-            sorted_video_scores = sorted(video_scores,key=lambda x: x[1])
-
-            return sorted_video_scores
-
-
-
-        ## Run simulation
-
-
-            
-        total_minutes_watched_today = 0   # how many minutes the agent has watched today
-        total_vids_watched_today = 0  # how many videos the agent watched today
-        agent_minutes_watched_today_array = []
-        agent_vids_watched_today_array = []
-        agent_extremeness_array = []
-        videos_watched_extremeness_array = []
-        extr_of_each_agent_video_all = []
-
-        '''
-        Change the ERROR below to DEBUG to trigger all of the print statements. 
-        They're there mostly as tests from when I was debugging and such.
-        However, if you want to see "real-time" info from the simulation as it's running, feel free to uncomment them.
-        '''
-        logger = logging.getLogger()
-        logger.setLevel(logging.ERROR)
-
-
-
-        for i in range(NUM_AGENTS): # runs through the simulation for every agent in our array of agents
-            
-            # print("AGENT #" + str(i))
-            # Establishing the values we need from our agent before any videos are watched
-            daily_agent = our_agents[i]
-            agent_number = daily_agent.agent_id
-            extr_of_each_agent_video = []
-            daily_agent_archetype = daily_agent.archetype
-
-            # These two need to be declared OUTSIDE of the run for each video.
-            # So, declare them within the day for a given agent, but OUTSIDE of the actual video selection checking loop.
-            # Otherwise, they don't actually get updated each time.
-            agent_minutes_watched_today = 0   # how many minutes the agent has watched today
-            agent_vids_watched_today = 0  # how many videos the agent watched today
-
-            activity_log = []  # ids of the videos the agent watched today
-
-
-            # Get the values for our agent's archetype
-
-            daily_agent_longest_vid = archetypes_list[agent_number]["longest_vid_threshold"]
-            daily_agent_yt_threshold = archetypes_list[agent_number]["yt_time_threshold"]
-            daily_agent_pol_aff = archetypes_list[agent_number]["political_affiliation"]
-            daily_agent_vid_extr = archetypes_list[agent_number]["video_extremity"]
-            daily_agent_pop_thresh = archetypes_list[agent_number]["popularity_threshold"]
-
-            
-            our_agents_videos = all_videos
-
-
-            time_left_check = True; # means we have enough time for the agent to keep watching videos
-
-
-            # From 11/5/23: using the score ranking system
-            agent_scores = calculate_score_multiple_vids_test(daily_agent, all_videos, ALPHA_WEIGHT, BETA_WEIGHT, gamma_values[g], DELTA_WEIGHT)
-            lookup_dict = {vid.vid_id: vid for vid in all_videos}
-
-
-
-            # This is where the agent is actually watching videos.
-
-            while(time_left_check == True):
-
-
-                j = 0   # j is the counter for iterating through the scored videos after each watch.
-                # suggested_video = lookup_dict[j]
-
-                suggested_video = suggest_video(our_agents_videos, len(our_agents_videos))
-
-                # Compare our agent's thresholds to the attributes of the video
-
-
-                # Check minimum view threshold
-                if(suggested_video.views >= daily_agent_pop_thresh):
-                    popularity_check = True
-                    logging.debug("Video is popular enough.")
-                else:
-                    popularity_check = False
-                    logging.debug("Video is not popular enough.")
-
-                # Check agent's max viewing length
-                if(suggested_video.length < daily_agent_longest_vid):
-                    length_check = True
-                    logging.debug("Video is proper length.")
-                else:
-                    length_check = False
-                    logging.debug("Video is too long.")
-
-                # Check if watching this video would exceed the agent's daily threshold
-                potential_mins_watched = agent_minutes_watched_today + suggested_video.length
-                if(potential_mins_watched < daily_agent_yt_threshold):
-                    time_left_check = True
-                    logging.debug("Still time to watch this video.")
-                else:
-                    time_left_check = False
-                    logging.debug("Not enough time left to watch this video.")
-
-                # Check if this video is too extreme for the agent.
-
-
-            
-                # Left-leaning archetypes will watch anything at 0.5 and above. Right-leaning will watch 0.5 and below.
-                if(daily_agent_pol_aff == "left"):
-                    # Will not watch anything under 0.5 extremeness
-                    # If video extremeness is < 0.5 or higher than their extremeness value, do not watch.
-                    if((suggested_video.extremeness < 0.5) or (suggested_video.extremeness > daily_agent_vid_extr)):
-                        extreme_check = False
-                        logging.debug("Video was too extreme.")
-                    else:
-                        extreme_check = True
-                        logging.debug("Video is within extremeness bounds (between 0.5 and agent's archetype value).")
-                elif(daily_agent_pol_aff == "right"):
-                    # Will not watch anything above 0.5 extremeness
-                    # If video extremeness is > 0.5 or lower than their extremeness value (0.0 is extreme here), do not watch.
-                    if((suggested_video.extremeness > 0.5) or (suggested_video.extremeness < daily_agent_vid_extr)):
-                        extreme_check = False
-                        logging.debug("Video was too extreme.")
-                    else:
-                        extreme_check = True
-                        logging.debug("Video is within extremeness bounds (between agent's archetype value and 0.5).")
-                elif(daily_agent_pol_aff == "middle"):
-                    # print("Extremeness:" + str(suggested_video.extremeness))
-                    # figuring this archetype is like middle of the road, they'll watch between 0.4 and 0.6
-                    if((suggested_video.extremeness < 0.2) or (suggested_video.extremeness > 0.8)):
-                        
-                        extreme_check = False
-                        logging.debug("Video was too extreme.")
-                    else:
-                        extreme_check = True 
-
-                # Other todo: find whatever bug/anomaly we mentioned was there
-
-                Activity.watch(suggested_video)     # Agent actually watches the video.
-                videos_watched_extremeness_array.append(suggested_video.extremeness)
-                extr_of_each_agent_video.append(suggested_video.extremeness)
-                agent_minutes_watched_today = agent_minutes_watched_today + suggested_video.length
-                agent_vids_watched_today = agent_vids_watched_today + 1
-                j += 1  # increments the iterator for the scored list videos 
-
-
-                
-            
-            # From below here, the agent is done watching videos for the day
-
-            total_minutes_watched_today = total_minutes_watched_today + agent_minutes_watched_today
-            total_vids_watched_today = total_vids_watched_today + agent_vids_watched_today
-
-            agent_minutes_watched_today_array.append(agent_minutes_watched_today)
-            agent_vids_watched_today_array.append(agent_vids_watched_today)
-            extr_of_each_agent_video_all.append(Average(extr_of_each_agent_video))
-            
-            
-            # This array needs to get the extremeness threshold of each agent
-            agent_extremeness_array.append(daily_agent_vid_extr)
-
-            logging.debug("\nVideos watched today: " + str(agent_vids_watched_today))
-            logging.debug("Minutes watched today: " + str(agent_minutes_watched_today))
-
-        
-        avg_videos_watched_extremeness_array = (sum(videos_watched_extremeness_array) / len(videos_watched_extremeness_array))
-
-
-
-        if(SCORE_SYSTEM_TOGGLE):
-
-            import statistics as statistics
-            from statistics import mean
-                
-            total_minutes_watched_today_scoring = 0   # how many minutes the agent has watched today
-            total_vids_watched_today_scoring = 0  # how many videos the agent watched today
-            agent_minutes_watched_today_array_scoring = []
-            agent_vids_watched_today_array_scoring = []
-            agent_extremeness_array_scoring = []
-            videos_watched_extremeness_array_scoring = []
-            extr_of_each_agent_video_all_scoring = []
-            j = 0
-
-            '''
-            Change the ERROR below to DEBUG to trigger all of the print statements. 
-            They're there mostly as tests from when I was debugging and such.
-            However, if you want to see "real-time" info from the simulation as it's running, feel free to uncomment them.
-            '''
-            logger = logging.getLogger()
-            logger.setLevel(logging.ERROR)
-
-
-            for i in range(NUM_AGENTS): # runs through the simulation for every agent in our array of agents
-                
-                # print("AGENT #" + str(i))
-                # Establishing the values we need from our agent before any videos are watched
-                daily_agent = our_agents[i]
-                agent_number = daily_agent.agent_id
-                extr_of_each_agent_video_scoring = []
-
-                # display_agent(daily_agent)
-                # daily_agent_archetype = daily_agent.archetype     commented out 1/23/24 because it's not doing anything
-
-                # These two need to be declared OUTSIDE of the run for each video.
-                # So, declare them within the day for a given agent, but OUTSIDE of the actual video selection checking loop.
-                # Otherwise, they don't actually get updated each time.
-                agent_minutes_watched_today_scoring = 0   # how many minutes the agent has watched today
-                agent_vids_watched_today_scoring = 0  # how many videos the agent watched today
-
-
-                activity_log = []  # ids of the videos the agent watched today
-
-
-                # Get the values for our agent's archetype
-
-                daily_agent_longest_vid = archetypes_list[agent_number]["longest_vid_threshold"]
-                daily_agent_yt_threshold = archetypes_list[agent_number]["yt_time_threshold"]
-                daily_agent_pol_aff = archetypes_list[agent_number]["political_affiliation"]
-                daily_agent_vid_extr = archetypes_list[agent_number]["video_extremity"]
-
-                
-                
-                agent_extremeness_array_scoring.append(daily_agent_vid_extr)
-
-
-                daily_agent_pop_thresh = archetypes_list[agent_number]["popularity_threshold"]
-
-
-
-                # When the recommendation system is toggled, gets our agent's pre-filtered list of videos based on their archetype.
-                # For this cell, that check does not happen.
-
-                our_agents_videos = all_videos
-
-
-                time_left_check = True; # means we have enough time for the agent to keep watching videos
-
-                agent_scores = calculate_score_multiple_vids_test(daily_agent, all_videos, ALPHA_WEIGHT, BETA_WEIGHT, gamma_values[g], DELTA_WEIGHT)
-            
-                
-                lookup_dict = {vid.vid_id: vid for vid in all_videos}
-
-
-                # This is where the agent is actually watching videos.
-
-                while(time_left_check == True):
-
-                    suggested_video = lookup_dict[agent_scores[j][0]]
-
-                    # Comparing our agent's thresholds to the attributes of the video
-
-
-                    # Check minimum view threshold
-                    if(suggested_video.views >= daily_agent_pop_thresh):
-                        popularity_check = True
-                        logging.debug("Video is popular enough.")
-                    else:
-                        popularity_check = False
-                        logging.debug("Video is not popular enough.")
-
-                    # Check agent's max viewing length
-                    if(suggested_video.length < daily_agent_longest_vid):
-                        length_check = True
-                        logging.debug("Video is proper length.")
-                    else:
-                        length_check = False
-                        logging.debug("Video is too long.")
-
-                    # Check if watching this video would exceed the agent's daily threshold
-                    potential_mins_watched = agent_minutes_watched_today_scoring + suggested_video.length
-                    if(potential_mins_watched < daily_agent_yt_threshold):
-                        time_left_check = True
-                        logging.debug("Still time to watch this video.")
-                    else:
-                        time_left_check = False
-                        logging.debug("Not enough time left to watch this video.")
-
-                    # Check if this video is too extreme for the agent.
-
-                
-                    # Left-leaning archetypes will watch anything at 0.5 and above. Right-leaning will watch 0.5 and below.
-                    if(daily_agent_pol_aff == "left"):
-                        # Will not watch anything under 0.5 extremeness
-                        # If video extremeness is < 0.5 or higher than their extremeness value, do not watch.
-                        if((suggested_video.extremeness < 0.5) or (suggested_video.extremeness > daily_agent_vid_extr)):
-                            extreme_check = False
-                            logging.debug("Video was too extreme.")
-                        else:
-                            extreme_check = True
-                            logging.debug("Video is within extremeness bounds (between 0.5 and agent's archetype value).")
-                    elif(daily_agent_pol_aff == "right"):
-                        # Will not watch anything above 0.5 extremeness
-                        # If video extremeness is > 0.5 or lower than their extremeness value (0.0 is extreme here), do not watch.
-                        if((suggested_video.extremeness > 0.5) or (suggested_video.extremeness < daily_agent_vid_extr)):
-                            extreme_check = False
-                            logging.debug("Video was too extreme.")
-                        else:
-                            extreme_check = True
-                            logging.debug("Video is within extremeness bounds (between agent's archetype value and 0.5).")
-                    elif(daily_agent_pol_aff == "middle"):
-                        # print("Extremeness:" + str(suggested_video.extremeness))
-                        # figuring this archetype is like middle of the road, they'll watch between 0.4 and 0.6
-                        if((suggested_video.extremeness < 0.2) or (suggested_video.extremeness > 0.8)):
-                            
-                            extreme_check = False
-                            logging.debug("Video was too extreme.")
-                        else:
-                            extreme_check = True 
-
-                    # Other todo: find whatever bug/anomaly we mentioned was there
-
-                    Activity.watch(suggested_video)     # Agent actually watches the video.
-                    videos_watched_extremeness_array_scoring.append(suggested_video.extremeness)
-                    extr_of_each_agent_video_scoring.append(suggested_video.extremeness)
-                    agent_minutes_watched_today_scoring = agent_minutes_watched_today_scoring + suggested_video.length
-                    agent_vids_watched_today_scoring = agent_vids_watched_today_scoring + 1 
-
-                    j = j+1
-
-            
-                
-                # From below here, the agent is done watching videos for the day
-
-                total_minutes_watched_today_scoring = total_minutes_watched_today_scoring + agent_minutes_watched_today_scoring
-                total_vids_watched_today_scoring = total_vids_watched_today_scoring + agent_vids_watched_today_scoring
-
-                agent_minutes_watched_today_array_scoring.append(agent_minutes_watched_today_scoring)
-                agent_vids_watched_today_array_scoring.append(agent_vids_watched_today_scoring)
-                extr_of_each_agent_video_all_scoring.append(mean(extr_of_each_agent_video_scoring))
-                
-                
-                # This array needs to get the extremeness threshold of each agent
-            
-
-                logging.debug("\nVideos watched today: " + str(agent_vids_watched_today_scoring))
-                logging.debug("Minutes watched today: " + str(agent_minutes_watched_today_scoring))
-
-
-            avg_videos_watched_extremeness_array_scoring = (sum(videos_watched_extremeness_array_scoring) / len(videos_watched_extremeness_array_scoring))
-        
-        
-
-        ## Append x_score and y_score to 2D array
-
-        #x1 (extremeness graph)
-        gamma_lines_extr.append([numpy.arange(0, NUM_AGENTS), Reverse(extr_of_each_agent_video_all_scoring)])
-
-        #x2 (minutes watched graph)    
-        gamma_lines_min.append([Reverse(agent_extremeness_array), Reverse(agent_minutes_watched_today_array_scoring)])
-
-        #x3 (vids watched graph)
-        gamma_lines_min.append([Reverse(agent_extremeness_array), Reverse(agent_vids_watched_today_array_scoring)])
-
-elif(var_to_test == "alpha"):
+if(var_to_test == "alpha"):
     alpha_values = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
     alpha_lines_extr = []    # needs to hold the xy values (x_score and y_score)
     alpha_lines_min = []
     alpha_lines_vids = []
+
+    # Added 3/25/24
+    alpha_lines_lens = []
 
 
     for a in range(len(alpha_values)):  # runs for each alpha value
@@ -1042,10 +604,10 @@ elif(var_to_test == "alpha"):
                 e_return = ev
 
                 #added 2/12/24: making sure delta rewards videos on both extreme ends
-                # if((ev <= 0.2) or (ev >= 0.8)):
-                #     e_return = 0.5
-                # else:
-                #     e_return = 0
+                if((ev <= 0.2) or (ev >= 0.8)):
+                    e_return = 0.625
+                else:
+                    e_return = 0
 
                 # For small score = good, + in front of components user wants small, and - for components user wants big
                 # + in front of component that YouTube wants small
@@ -1062,7 +624,7 @@ elif(var_to_test == "alpha"):
 
         ## Run simulation
 
-
+        ## Arrays for ALL AGENTS today
             
         total_minutes_watched_today = 0   # how many minutes the agent has watched today
         total_vids_watched_today = 0  # how many videos the agent watched today
@@ -1071,6 +633,14 @@ elif(var_to_test == "alpha"):
         agent_extremeness_array = []
         videos_watched_extremeness_array = []
         extr_of_each_agent_video_all = []
+
+
+        # New arrays for all agents today: 3/25/24
+
+        x_agent_len_thresholds = [] # will hold the longest length each agent will watch
+        y_agent_avg_len_watched  = [] # will hold the average length each agent watches
+
+
 
         '''
         Change the ERROR below to DEBUG to trigger all of the print statements. 
@@ -1090,6 +660,7 @@ elif(var_to_test == "alpha"):
             agent_number = daily_agent.agent_id
             extr_of_each_agent_video = []
             daily_agent_archetype = daily_agent.archetype
+            daily_agent_lens = []
 
             # These two need to be declared OUTSIDE of the run for each video.
             # So, declare them within the day for a given agent, but OUTSIDE of the actual video selection checking loop.
@@ -1107,6 +678,10 @@ elif(var_to_test == "alpha"):
             daily_agent_pol_aff = archetypes_list[agent_number]["political_affiliation"]
             daily_agent_vid_extr = archetypes_list[agent_number]["video_extremity"]
             daily_agent_pop_thresh = archetypes_list[agent_number]["popularity_threshold"]
+
+
+            # Added 3/25/24
+            x_agent_len_thresholds.append(daily_agent_longest_vid)
 
             
             our_agents_videos = all_videos
@@ -1197,6 +772,10 @@ elif(var_to_test == "alpha"):
                 Activity.watch(suggested_video)     # Agent actually watches the video.
                 videos_watched_extremeness_array.append(suggested_video.extremeness)
                 extr_of_each_agent_video.append(suggested_video.extremeness)
+
+                # Added 3/25/24
+                daily_agent_lens.append(suggested_video.length)
+
                 agent_minutes_watched_today = agent_minutes_watched_today + suggested_video.length
                 agent_vids_watched_today = agent_vids_watched_today + 1
                 j += 1  # increments the iterator for the scored list videos 
@@ -1370,6 +949,10 @@ elif(var_to_test == "alpha"):
                     Activity.watch(suggested_video)     # Agent actually watches the video.
                     videos_watched_extremeness_array_scoring.append(suggested_video.extremeness)
                     extr_of_each_agent_video_scoring.append(suggested_video.extremeness)
+
+                    # Added 3/25/24
+                    daily_agent_lens.append(suggested_video.length)
+
                     agent_minutes_watched_today_scoring = agent_minutes_watched_today_scoring + suggested_video.length
                     agent_vids_watched_today_scoring = agent_vids_watched_today_scoring + 1 
 
@@ -1377,7 +960,7 @@ elif(var_to_test == "alpha"):
 
             
                 
-                # From below here, the agent is done watching videos for the day
+                # From below here, the agent is done watching videos for the day.
 
                 total_minutes_watched_today_scoring = total_minutes_watched_today_scoring + agent_minutes_watched_today_scoring
                 total_vids_watched_today_scoring = total_vids_watched_today_scoring + agent_vids_watched_today_scoring
@@ -1385,6 +968,9 @@ elif(var_to_test == "alpha"):
                 agent_minutes_watched_today_array_scoring.append(agent_minutes_watched_today_scoring)
                 agent_vids_watched_today_array_scoring.append(agent_vids_watched_today_scoring)
                 extr_of_each_agent_video_all_scoring.append(mean(extr_of_each_agent_video_scoring))
+
+                # Added 3/25/24: records this agent's average length watched
+                y_agent_avg_len_watched.append(mean(daily_agent_lens))
                 
                 
                 # This array needs to get the extremeness threshold of each agent
@@ -1396,9 +982,8 @@ elif(var_to_test == "alpha"):
 
             avg_videos_watched_extremeness_array_scoring = (sum(videos_watched_extremeness_array_scoring) / len(videos_watched_extremeness_array_scoring))
         
-        
-
-        ## Append x_score and y_score to 2D array
+    
+        ## For the GAMMA graph: Append x_score and y_score to 2D array
 
         #x1 (extremeness graph)
         alpha_lines_extr.append([numpy.arange(0, NUM_AGENTS), Reverse(extr_of_each_agent_video_all_scoring)])
@@ -1409,11 +994,494 @@ elif(var_to_test == "alpha"):
         #x3 (vids watched graph)
         alpha_lines_min.append([Reverse(agent_extremeness_array), Reverse(agent_vids_watched_today_array_scoring)])
 
+        ## For the alpha graph
+        alpha_lines_lens.append([x_agent_len_thresholds, y_agent_avg_len_watched])
+
+
+
+
+
+
+elif(var_to_test == "gamma"):
+    gamma_values = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+    gamma_lines_extr = []    # needs to hold the xy values (x_score and y_score)
+    gamma_lines_min = []
+    gamma_lines_vids = []
+
+    # Added 3/25/24
+    gamma_lines_lens = []
+
+
+    for g in range(len(gamma_values)):  # runs for each gamma value
+        print("gamma: " + str(gamma_values[g]))
+
+        # need to pass each of these gamma values into the simulation
+        # and then put x_score and y_score into a 2D array so those tuples can be graphed (all on the same graph)
+
+        def calculate_score_multiple_vids_test(our_agent, our_videos, alpha, beta, gamma, delta):
+            alpha = alpha     # weight placed on video length
+            beta = beta     # weight placed on video popularity
+            gamma = gamma     # weight placed on video alignment (how similar extremeness is to user's)
+            delta = delta    # weight placed on extremeness of the video
+
+            our_agent_archetype = our_agent.archetype
+            agent_number = our_agent.agent_id
+
+            video_scores = []
+
+            # Max values for the video qualities
+            max_length = 80
+            max_pop = 1000000
+            max_align = 1
+            max_extr = 1
+
+            daily_agent_longest_vid = archetypes_list[agent_number]["longest_vid_threshold"]
+            daily_agent_yt_threshold = archetypes_list[agent_number]["yt_time_threshold"]
+            daily_agent_pol_aff = archetypes_list[agent_number]["political_affiliation"]
+            daily_agent_vid_extr = archetypes_list[agent_number]["video_extremity"]
+            daily_agent_pop_thresh = archetypes_list[agent_number]["popularity_threshold"]
+
+
+            for i in range(NUM_VIDEOS):
+                # Length values
+                our_video = our_videos[i]
+                l_return = 0  # return value now that we're using a threshold
+                lv = our_video.length
+                la = archetypes_list[agent_number]["longest_vid_threshold"]
+                # agents favor shorter videos. so if lv is > la above the length, give a 0. if lv<la, a 1 or something scaled appropriately.
+                if(lv > la):    # video length is greater than our archetype's preference
+                    l_return = 0
+                else:
+                    # l_return = lv / max_length
+                    l_return = 1
+
+                # wants videos below threshold---we want the value to be bigger, so this one gets a minus
+
+                # Popularity values
+                p_return = -1
+                pv = our_video.views
+                pa = archetypes_list[agent_number]["popularity_threshold"]
+                # logging.debug(print("pv: " + str(pv) + " vs pa: " + str(pa)))
+                # make 0 if below threshold, but scaled appropriately if above
+                # instead of the abs it;ll be either a zero or a positive number, keep the minus sign
+                if(pv < pa): # video popularity is less than our archetype's preference
+                    # logging.debug(print("pv<a"))
+                    p_return = 0
+                else:
+                    # logging.debug(print("pv>pa"))
+                    p_return = 1
+                    # p_return = pv / max_pop
+                
+                
+                # Extremeness values
+                ev = our_video.extremeness
+                ea = archetypes_list[agent_number]["video_extremity"]
+                e_return = ev
+
+                #added 2/12/24: making sure delta rewards videos on both extreme ends
+                if((ev <= 0.2) or (ev >= 0.8)):
+                    e_return = 0.625
+                else:
+                    e_return = 0
+
+                # For small score = good, + in front of components user wants small, and - for components user wants big
+                # + in front of component that YouTube wants small
+                score = -(alpha * l_return) - (beta * p_return) + (gamma * (abs(ev-ea)/max_align)) - (delta * e_return)/max_extr
+
+                video_scores.append((i, score))
+
+            # Freeze 1 row, then sort by second column.
+            sorted_video_scores = sorted(video_scores,key=lambda x: x[1])
+
+            return sorted_video_scores
+
+
+
+        ## Run simulation
+
+        ## Arrays for ALL AGENTS today
+            
+        total_minutes_watched_today = 0   # how many minutes the agent has watched today
+        total_vids_watched_today = 0  # how many videos the agent watched today
+        agent_minutes_watched_today_array = []
+        agent_vids_watched_today_array = []
+        agent_extremeness_array = []
+        videos_watched_extremeness_array = []
+        extr_of_each_agent_video_all = []
+
+
+        # New arrays for all agents today: 3/25/24
+
+        x_agent_len_thresholds = [] # will hold the longest length each agent will watch
+        y_agent_avg_len_watched  = [] # will hold the average length each agent watches
+
+
+
+        '''
+        Change the ERROR below to DEBUG to trigger all of the print statements. 
+        They're there mostly as tests from when I was debugging and such.
+        However, if you want to see "real-time" info from the simulation as it's running, feel free to uncomment them.
+        '''
+        logger = logging.getLogger()
+        logger.setLevel(logging.ERROR)
+
+
+
+        for i in range(NUM_AGENTS): # runs through the simulation for every agent in our array of agents
+            
+            # print("AGENT #" + str(i))
+            # Establishing the values we need from our agent before any videos are watched
+            daily_agent = our_agents[i]
+            agent_number = daily_agent.agent_id
+            extr_of_each_agent_video = []
+            daily_agent_archetype = daily_agent.archetype
+            daily_agent_lens = []
+
+            # These two need to be declared OUTSIDE of the run for each video.
+            # So, declare them within the day for a given agent, but OUTSIDE of the actual video selection checking loop.
+            # Otherwise, they don't actually get updated each time.
+            agent_minutes_watched_today = 0   # how many minutes the agent has watched today
+            agent_vids_watched_today = 0  # how many videos the agent watched today
+
+            activity_log = []  # ids of the videos the agent watched today
+
+
+            # Get the values for our agent's archetype
+
+            daily_agent_longest_vid = archetypes_list[agent_number]["longest_vid_threshold"]
+            daily_agent_yt_threshold = archetypes_list[agent_number]["yt_time_threshold"]
+            daily_agent_pol_aff = archetypes_list[agent_number]["political_affiliation"]
+            daily_agent_vid_extr = archetypes_list[agent_number]["video_extremity"]
+            daily_agent_pop_thresh = archetypes_list[agent_number]["popularity_threshold"]
+
+
+            # Added 3/25/24
+            x_agent_len_thresholds.append(daily_agent_longest_vid)
+
+            
+            our_agents_videos = all_videos
+
+
+            time_left_check = True; # means we have enough time for the agent to keep watching videos
+
+
+            # From 11/5/23: using the score ranking system
+            agent_scores = calculate_score_multiple_vids_test(daily_agent, all_videos, ALPHA_WEIGHT, BETA_WEIGHT, gamma_values[g], DELTA_WEIGHT)
+            lookup_dict = {vid.vid_id: vid for vid in all_videos}
+
+
+
+            # This is where the agent is actually watching videos.
+
+            while(time_left_check == True):
+
+
+                j = 0   # j is the counter for iterating through the scored videos after each watch.
+                # suggested_video = lookup_dict[j]
+
+                suggested_video = suggest_video(our_agents_videos, len(our_agents_videos))
+
+                # Compare our agent's thresholds to the attributes of the video
+
+
+                # Check minimum view threshold
+                if(suggested_video.views >= daily_agent_pop_thresh):
+                    popularity_check = True
+                    logging.debug("Video is popular enough.")
+                else:
+                    popularity_check = False
+                    logging.debug("Video is not popular enough.")
+
+                # Check agent's max viewing length
+                if(suggested_video.length < daily_agent_longest_vid):
+                    length_check = True
+                    logging.debug("Video is proper length.")
+                else:
+                    length_check = False
+                    logging.debug("Video is too long.")
+
+                # Check if watching this video would exceed the agent's daily threshold
+                potential_mins_watched = agent_minutes_watched_today + suggested_video.length
+                if(potential_mins_watched < daily_agent_yt_threshold):
+                    time_left_check = True
+                    logging.debug("Still time to watch this video.")
+                else:
+                    time_left_check = False
+                    logging.debug("Not enough time left to watch this video.")
+
+                # Check if this video is too extreme for the agent.
+
+
+            
+                # Left-leaning archetypes will watch anything at 0.5 and above. Right-leaning will watch 0.5 and below.
+                if(daily_agent_pol_aff == "left"):
+                    # Will not watch anything under 0.5 extremeness
+                    # If video extremeness is < 0.5 or higher than their extremeness value, do not watch.
+                    if((suggested_video.extremeness < 0.5) or (suggested_video.extremeness > daily_agent_vid_extr)):
+                        extreme_check = False
+                        logging.debug("Video was too extreme.")
+                    else:
+                        extreme_check = True
+                        logging.debug("Video is within extremeness bounds (between 0.5 and agent's archetype value).")
+                elif(daily_agent_pol_aff == "right"):
+                    # Will not watch anything above 0.5 extremeness
+                    # If video extremeness is > 0.5 or lower than their extremeness value (0.0 is extreme here), do not watch.
+                    if((suggested_video.extremeness > 0.5) or (suggested_video.extremeness < daily_agent_vid_extr)):
+                        extreme_check = False
+                        logging.debug("Video was too extreme.")
+                    else:
+                        extreme_check = True
+                        logging.debug("Video is within extremeness bounds (between agent's archetype value and 0.5).")
+                elif(daily_agent_pol_aff == "middle"):
+                    # print("Extremeness:" + str(suggested_video.extremeness))
+                    # figuring this archetype is like middle of the road, they'll watch between 0.4 and 0.6
+                    if((suggested_video.extremeness < 0.2) or (suggested_video.extremeness > 0.8)):
+                        
+                        extreme_check = False
+                        logging.debug("Video was too extreme.")
+                    else:
+                        extreme_check = True 
+
+                # Other todo: find whatever bug/anomaly we mentioned was there
+
+                Activity.watch(suggested_video)     # Agent actually watches the video.
+                videos_watched_extremeness_array.append(suggested_video.extremeness)
+                extr_of_each_agent_video.append(suggested_video.extremeness)
+
+                # Added 3/25/24
+                daily_agent_lens.append(suggested_video.length)
+
+                agent_minutes_watched_today = agent_minutes_watched_today + suggested_video.length
+                agent_vids_watched_today = agent_vids_watched_today + 1
+                j += 1  # increments the iterator for the scored list videos 
+
+
+                
+            
+            # From below here, the agent is done watching videos for the day
+
+            total_minutes_watched_today = total_minutes_watched_today + agent_minutes_watched_today
+            total_vids_watched_today = total_vids_watched_today + agent_vids_watched_today
+
+            agent_minutes_watched_today_array.append(agent_minutes_watched_today)
+            agent_vids_watched_today_array.append(agent_vids_watched_today)
+            extr_of_each_agent_video_all.append(Average(extr_of_each_agent_video))
+            
+            
+            # This array needs to get the extremeness threshold of each agent
+            agent_extremeness_array.append(daily_agent_vid_extr)
+
+            logging.debug("\nVideos watched today: " + str(agent_vids_watched_today))
+            logging.debug("Minutes watched today: " + str(agent_minutes_watched_today))
+
+        
+        avg_videos_watched_extremeness_array = (sum(videos_watched_extremeness_array) / len(videos_watched_extremeness_array))
+
+
+
+        if(SCORE_SYSTEM_TOGGLE):
+
+            import statistics as statistics
+            from statistics import mean
+                
+            total_minutes_watched_today_scoring = 0   # how many minutes the agent has watched today
+            total_vids_watched_today_scoring = 0  # how many videos the agent watched today
+            agent_minutes_watched_today_array_scoring = []
+            agent_vids_watched_today_array_scoring = []
+            agent_extremeness_array_scoring = []
+            videos_watched_extremeness_array_scoring = []
+            extr_of_each_agent_video_all_scoring = []
+            j = 0
+
+            '''
+            Change the ERROR below to DEBUG to trigger all of the print statements. 
+            They're there mostly as tests from when I was debugging and such.
+            However, if you want to see "real-time" info from the simulation as it's running, feel free to uncomment them.
+            '''
+            logger = logging.getLogger()
+            logger.setLevel(logging.ERROR)
+
+
+            for i in range(NUM_AGENTS): # runs through the simulation for every agent in our array of agents
+                
+                # print("AGENT #" + str(i))
+                # Establishing the values we need from our agent before any videos are watched
+                daily_agent = our_agents[i]
+                agent_number = daily_agent.agent_id
+                extr_of_each_agent_video_scoring = []
+
+                # display_agent(daily_agent)
+                # daily_agent_archetype = daily_agent.archetype     commented out 1/23/24 because it's not doing anything
+
+                # These two need to be declared OUTSIDE of the run for each video.
+                # So, declare them within the day for a given agent, but OUTSIDE of the actual video selection checking loop.
+                # Otherwise, they don't actually get updated each time.
+                agent_minutes_watched_today_scoring = 0   # how many minutes the agent has watched today
+                agent_vids_watched_today_scoring = 0  # how many videos the agent watched today
+
+
+                activity_log = []  # ids of the videos the agent watched today
+
+
+                # Get the values for our agent's archetype
+
+                daily_agent_longest_vid = archetypes_list[agent_number]["longest_vid_threshold"]
+                daily_agent_yt_threshold = archetypes_list[agent_number]["yt_time_threshold"]
+                daily_agent_pol_aff = archetypes_list[agent_number]["political_affiliation"]
+                daily_agent_vid_extr = archetypes_list[agent_number]["video_extremity"]
+
+                
+                
+                agent_extremeness_array_scoring.append(daily_agent_vid_extr)
+
+
+                daily_agent_pop_thresh = archetypes_list[agent_number]["popularity_threshold"]
+
+
+
+                # When the recommendation system is toggled, gets our agent's pre-filtered list of videos based on their archetype.
+                # For this cell, that check does not happen.
+
+                our_agents_videos = all_videos
+
+
+                time_left_check = True; # means we have enough time for the agent to keep watching videos
+
+                agent_scores = calculate_score_multiple_vids_test(daily_agent, all_videos, ALPHA_WEIGHT, BETA_WEIGHT, gamma_values[g], DELTA_WEIGHT)
+            
+                
+                lookup_dict = {vid.vid_id: vid for vid in all_videos}
+
+
+                # This is where the agent is actually watching videos.
+
+                while(time_left_check == True):
+
+                    suggested_video = lookup_dict[agent_scores[j][0]]
+
+                    # Comparing our agent's thresholds to the attributes of the video
+
+
+                    # Check minimum view threshold
+                    if(suggested_video.views >= daily_agent_pop_thresh):
+                        popularity_check = True
+                        logging.debug("Video is popular enough.")
+                    else:
+                        popularity_check = False
+                        logging.debug("Video is not popular enough.")
+
+                    # Check agent's max viewing length
+                    if(suggested_video.length < daily_agent_longest_vid):
+                        length_check = True
+                        logging.debug("Video is proper length.")
+                    else:
+                        length_check = False
+                        logging.debug("Video is too long.")
+
+                    # Check if watching this video would exceed the agent's daily threshold
+                    potential_mins_watched = agent_minutes_watched_today_scoring + suggested_video.length
+                    if(potential_mins_watched < daily_agent_yt_threshold):
+                        time_left_check = True
+                        logging.debug("Still time to watch this video.")
+                    else:
+                        time_left_check = False
+                        logging.debug("Not enough time left to watch this video.")
+
+                    # Check if this video is too extreme for the agent.
+
+                
+                    # Left-leaning archetypes will watch anything at 0.5 and above. Right-leaning will watch 0.5 and below.
+                    if(daily_agent_pol_aff == "left"):
+                        # Will not watch anything under 0.5 extremeness
+                        # If video extremeness is < 0.5 or higher than their extremeness value, do not watch.
+                        if((suggested_video.extremeness < 0.5) or (suggested_video.extremeness > daily_agent_vid_extr)):
+                            extreme_check = False
+                            logging.debug("Video was too extreme.")
+                        else:
+                            extreme_check = True
+                            logging.debug("Video is within extremeness bounds (between 0.5 and agent's archetype value).")
+                    elif(daily_agent_pol_aff == "right"):
+                        # Will not watch anything above 0.5 extremeness
+                        # If video extremeness is > 0.5 or lower than their extremeness value (0.0 is extreme here), do not watch.
+                        if((suggested_video.extremeness > 0.5) or (suggested_video.extremeness < daily_agent_vid_extr)):
+                            extreme_check = False
+                            logging.debug("Video was too extreme.")
+                        else:
+                            extreme_check = True
+                            logging.debug("Video is within extremeness bounds (between agent's archetype value and 0.5).")
+                    elif(daily_agent_pol_aff == "middle"):
+                        # print("Extremeness:" + str(suggested_video.extremeness))
+                        # figuring this archetype is like middle of the road, they'll watch between 0.4 and 0.6
+                        if((suggested_video.extremeness < 0.2) or (suggested_video.extremeness > 0.8)):
+                            
+                            extreme_check = False
+                            logging.debug("Video was too extreme.")
+                        else:
+                            extreme_check = True 
+
+                    # Other todo: find whatever bug/anomaly we mentioned was there
+
+                    Activity.watch(suggested_video)     # Agent actually watches the video.
+                    videos_watched_extremeness_array_scoring.append(suggested_video.extremeness)
+                    extr_of_each_agent_video_scoring.append(suggested_video.extremeness)
+
+                    # Added 3/25/24
+                    daily_agent_lens.append(suggested_video.length)
+
+                    agent_minutes_watched_today_scoring = agent_minutes_watched_today_scoring + suggested_video.length
+                    agent_vids_watched_today_scoring = agent_vids_watched_today_scoring + 1 
+
+                    j = j+1
+
+            
+                
+                # From below here, the agent is done watching videos for the day.
+
+                total_minutes_watched_today_scoring = total_minutes_watched_today_scoring + agent_minutes_watched_today_scoring
+                total_vids_watched_today_scoring = total_vids_watched_today_scoring + agent_vids_watched_today_scoring
+
+                agent_minutes_watched_today_array_scoring.append(agent_minutes_watched_today_scoring)
+                agent_vids_watched_today_array_scoring.append(agent_vids_watched_today_scoring)
+                extr_of_each_agent_video_all_scoring.append(mean(extr_of_each_agent_video_scoring))
+
+                # Added 3/25/24: records this agent's average length watched
+                y_agent_avg_len_watched.append(mean(daily_agent_lens))
+                
+                
+                # This array needs to get the extremeness threshold of each agent
+            
+
+                logging.debug("\nVideos watched today: " + str(agent_vids_watched_today_scoring))
+                logging.debug("Minutes watched today: " + str(agent_minutes_watched_today_scoring))
+
+
+            avg_videos_watched_extremeness_array_scoring = (sum(videos_watched_extremeness_array_scoring) / len(videos_watched_extremeness_array_scoring))
+        
+    
+        ## For the GAMMA graph: Append x_score and y_score to 2D array
+
+        #x1 (extremeness graph)
+        gamma_lines_extr.append([numpy.arange(0, NUM_AGENTS), Reverse(extr_of_each_agent_video_all_scoring)])
+
+        #x2 (minutes watched graph)    
+        gamma_lines_min.append([Reverse(agent_extremeness_array), Reverse(agent_minutes_watched_today_array_scoring)])
+
+        #x3 (vids watched graph)
+        gamma_lines_min.append([Reverse(agent_extremeness_array), Reverse(agent_vids_watched_today_array_scoring)])
+
+        ## For the gamma graph
+        gamma_lines_lens.append([x_agent_len_thresholds, y_agent_avg_len_watched])
+
+
+
 elif(var_to_test == "beta"):
     beta_values = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
     beta_lines_extr = []    # needs to hold the xy values (x_score and y_score)
     beta_lines_min = []
     beta_lines_vids = []
+
+    # Added 3/25/24
+    beta_lines_lens = []
 
 
     for b in range(len(beta_values)):  # runs for each beta value
@@ -1483,10 +1551,10 @@ elif(var_to_test == "beta"):
                 e_return = ev
 
                 #added 2/12/24: making sure delta rewards videos on both extreme ends
-                # if((ev <= 0.2) or (ev >= 0.8)):
-                #     e_return = 0.5
-                # else:
-                #     e_return = 0
+                if((ev <= 0.2) or (ev >= 0.8)):
+                    e_return = 0.625
+                else:
+                    e_return = 0
 
                 # For small score = good, + in front of components user wants small, and - for components user wants big
                 # + in front of component that YouTube wants small
@@ -1503,7 +1571,7 @@ elif(var_to_test == "beta"):
 
         ## Run simulation
 
-
+        ## Arrays for ALL AGENTS today
             
         total_minutes_watched_today = 0   # how many minutes the agent has watched today
         total_vids_watched_today = 0  # how many videos the agent watched today
@@ -1512,6 +1580,14 @@ elif(var_to_test == "beta"):
         agent_extremeness_array = []
         videos_watched_extremeness_array = []
         extr_of_each_agent_video_all = []
+
+
+        # New arrays for all agents today: 3/25/24
+
+        x_agent_len_thresholds = [] # will hold the longest length each agent will watch
+        y_agent_avg_len_watched  = [] # will hold the average length each agent watches
+
+
 
         '''
         Change the ERROR below to DEBUG to trigger all of the print statements. 
@@ -1531,6 +1607,7 @@ elif(var_to_test == "beta"):
             agent_number = daily_agent.agent_id
             extr_of_each_agent_video = []
             daily_agent_archetype = daily_agent.archetype
+            daily_agent_lens = []
 
             # These two need to be declared OUTSIDE of the run for each video.
             # So, declare them within the day for a given agent, but OUTSIDE of the actual video selection checking loop.
@@ -1548,6 +1625,10 @@ elif(var_to_test == "beta"):
             daily_agent_pol_aff = archetypes_list[agent_number]["political_affiliation"]
             daily_agent_vid_extr = archetypes_list[agent_number]["video_extremity"]
             daily_agent_pop_thresh = archetypes_list[agent_number]["popularity_threshold"]
+
+
+            # Added 3/25/24
+            x_agent_len_thresholds.append(daily_agent_longest_vid)
 
             
             our_agents_videos = all_videos
@@ -1638,6 +1719,10 @@ elif(var_to_test == "beta"):
                 Activity.watch(suggested_video)     # Agent actually watches the video.
                 videos_watched_extremeness_array.append(suggested_video.extremeness)
                 extr_of_each_agent_video.append(suggested_video.extremeness)
+
+                # Added 3/25/24
+                daily_agent_lens.append(suggested_video.length)
+
                 agent_minutes_watched_today = agent_minutes_watched_today + suggested_video.length
                 agent_vids_watched_today = agent_vids_watched_today + 1
                 j += 1  # increments the iterator for the scored list videos 
@@ -1811,6 +1896,10 @@ elif(var_to_test == "beta"):
                     Activity.watch(suggested_video)     # Agent actually watches the video.
                     videos_watched_extremeness_array_scoring.append(suggested_video.extremeness)
                     extr_of_each_agent_video_scoring.append(suggested_video.extremeness)
+
+                    # Added 3/25/24
+                    daily_agent_lens.append(suggested_video.length)
+
                     agent_minutes_watched_today_scoring = agent_minutes_watched_today_scoring + suggested_video.length
                     agent_vids_watched_today_scoring = agent_vids_watched_today_scoring + 1 
 
@@ -1818,7 +1907,7 @@ elif(var_to_test == "beta"):
 
             
                 
-                # From below here, the agent is done watching videos for the day
+                # From below here, the agent is done watching videos for the day.
 
                 total_minutes_watched_today_scoring = total_minutes_watched_today_scoring + agent_minutes_watched_today_scoring
                 total_vids_watched_today_scoring = total_vids_watched_today_scoring + agent_vids_watched_today_scoring
@@ -1826,6 +1915,9 @@ elif(var_to_test == "beta"):
                 agent_minutes_watched_today_array_scoring.append(agent_minutes_watched_today_scoring)
                 agent_vids_watched_today_array_scoring.append(agent_vids_watched_today_scoring)
                 extr_of_each_agent_video_all_scoring.append(mean(extr_of_each_agent_video_scoring))
+
+                # Added 3/25/24: records this agent's average length watched
+                y_agent_avg_len_watched.append(mean(daily_agent_lens))
                 
                 
                 # This array needs to get the extremeness threshold of each agent
@@ -1837,9 +1929,8 @@ elif(var_to_test == "beta"):
 
             avg_videos_watched_extremeness_array_scoring = (sum(videos_watched_extremeness_array_scoring) / len(videos_watched_extremeness_array_scoring))
         
-        
-
-        ## Append x_score and y_score to 2D array
+    
+        ## For the GAMMA graph: Append x_score and y_score to 2D array
 
         #x1 (extremeness graph)
         beta_lines_extr.append([numpy.arange(0, NUM_AGENTS), Reverse(extr_of_each_agent_video_all_scoring)])
@@ -1850,11 +1941,20 @@ elif(var_to_test == "beta"):
         #x3 (vids watched graph)
         beta_lines_min.append([Reverse(agent_extremeness_array), Reverse(agent_vids_watched_today_array_scoring)])
 
+        ## For the alpha graph
+        beta_lines_lens.append([x_agent_len_thresholds, y_agent_avg_len_watched])
+
+
+
+
 elif(var_to_test == "delta"):
     delta_values = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
     delta_lines_extr = []    # needs to hold the xy values (x_score and y_score)
     delta_lines_min = []
     delta_lines_vids = []
+
+    # Added 3/25/24
+    delta_lines_lens = []
 
 
     for d in range(len(delta_values)):  # runs for each delta value
@@ -1924,10 +2024,10 @@ elif(var_to_test == "delta"):
                 e_return = ev
 
                 #added 2/12/24: making sure delta rewards videos on both extreme ends
-                # if((ev <= 0.2) or (ev >= 0.8)):
-                #     e_return = 0.5
-                # else:
-                #     e_return = 0
+                if((ev <= 0.2) or (ev >= 0.8)):
+                    e_return = 0.625
+                else:
+                    e_return = 0
 
                 # For small score = good, + in front of components user wants small, and - for components user wants big
                 # + in front of component that YouTube wants small
@@ -1944,7 +2044,7 @@ elif(var_to_test == "delta"):
 
         ## Run simulation
 
-
+        ## Arrays for ALL AGENTS today
             
         total_minutes_watched_today = 0   # how many minutes the agent has watched today
         total_vids_watched_today = 0  # how many videos the agent watched today
@@ -1953,6 +2053,14 @@ elif(var_to_test == "delta"):
         agent_extremeness_array = []
         videos_watched_extremeness_array = []
         extr_of_each_agent_video_all = []
+
+
+        # New arrays for all agents today: 3/25/24
+
+        x_agent_len_thresholds = [] # will hold the longest length each agent will watch
+        y_agent_avg_len_watched  = [] # will hold the average length each agent watches
+
+
 
         '''
         Change the ERROR below to DEBUG to trigger all of the print statements. 
@@ -1972,6 +2080,7 @@ elif(var_to_test == "delta"):
             agent_number = daily_agent.agent_id
             extr_of_each_agent_video = []
             daily_agent_archetype = daily_agent.archetype
+            daily_agent_lens = []
 
             # These two need to be declared OUTSIDE of the run for each video.
             # So, declare them within the day for a given agent, but OUTSIDE of the actual video selection checking loop.
@@ -1989,6 +2098,10 @@ elif(var_to_test == "delta"):
             daily_agent_pol_aff = archetypes_list[agent_number]["political_affiliation"]
             daily_agent_vid_extr = archetypes_list[agent_number]["video_extremity"]
             daily_agent_pop_thresh = archetypes_list[agent_number]["popularity_threshold"]
+
+
+            # Added 3/25/24
+            x_agent_len_thresholds.append(daily_agent_longest_vid)
 
             
             our_agents_videos = all_videos
@@ -2079,6 +2192,10 @@ elif(var_to_test == "delta"):
                 Activity.watch(suggested_video)     # Agent actually watches the video.
                 videos_watched_extremeness_array.append(suggested_video.extremeness)
                 extr_of_each_agent_video.append(suggested_video.extremeness)
+
+                # Added 3/25/24
+                daily_agent_lens.append(suggested_video.length)
+
                 agent_minutes_watched_today = agent_minutes_watched_today + suggested_video.length
                 agent_vids_watched_today = agent_vids_watched_today + 1
                 j += 1  # increments the iterator for the scored list videos 
@@ -2252,6 +2369,10 @@ elif(var_to_test == "delta"):
                     Activity.watch(suggested_video)     # Agent actually watches the video.
                     videos_watched_extremeness_array_scoring.append(suggested_video.extremeness)
                     extr_of_each_agent_video_scoring.append(suggested_video.extremeness)
+
+                    # Added 3/25/24
+                    daily_agent_lens.append(suggested_video.length)
+
                     agent_minutes_watched_today_scoring = agent_minutes_watched_today_scoring + suggested_video.length
                     agent_vids_watched_today_scoring = agent_vids_watched_today_scoring + 1 
 
@@ -2259,7 +2380,7 @@ elif(var_to_test == "delta"):
 
             
                 
-                # From below here, the agent is done watching videos for the day
+                # From below here, the agent is done watching videos for the day.
 
                 total_minutes_watched_today_scoring = total_minutes_watched_today_scoring + agent_minutes_watched_today_scoring
                 total_vids_watched_today_scoring = total_vids_watched_today_scoring + agent_vids_watched_today_scoring
@@ -2267,6 +2388,9 @@ elif(var_to_test == "delta"):
                 agent_minutes_watched_today_array_scoring.append(agent_minutes_watched_today_scoring)
                 agent_vids_watched_today_array_scoring.append(agent_vids_watched_today_scoring)
                 extr_of_each_agent_video_all_scoring.append(mean(extr_of_each_agent_video_scoring))
+
+                # Added 3/25/24: records this agent's average length watched
+                y_agent_avg_len_watched.append(mean(daily_agent_lens))
                 
                 
                 # This array needs to get the extremeness threshold of each agent
@@ -2278,9 +2402,8 @@ elif(var_to_test == "delta"):
 
             avg_videos_watched_extremeness_array_scoring = (sum(videos_watched_extremeness_array_scoring) / len(videos_watched_extremeness_array_scoring))
         
-        
-
-        ## Append x_score and y_score to 2D array
+    
+        ## For the GAMMA graph: Append x_score and y_score to 2D array
 
         #x1 (extremeness graph)
         delta_lines_extr.append([numpy.arange(0, NUM_AGENTS), Reverse(extr_of_each_agent_video_all_scoring)])
@@ -2291,6 +2414,10 @@ elif(var_to_test == "delta"):
         #x3 (vids watched graph)
         delta_lines_min.append([Reverse(agent_extremeness_array), Reverse(agent_vids_watched_today_array_scoring)])
 
+        ## For the delta graph
+        delta_lines_lens.append([x_agent_len_thresholds, y_agent_avg_len_watched])
+
+
 
 
 
@@ -2300,15 +2427,97 @@ elif(var_to_test == "delta"):
 # %% [markdown]
 # Avg. Extremeness of Videos Watched Per Agent Regression
 
+
+
+# ALPHA GRAPH
 import matplotlib as matplotlib
 import pandas as pd
 
-x1 = numpy.arange(0, NUM_AGENTS)
-y1 = Reverse(extr_of_each_agent_video_all)
+x1_alphagraph = numpy.arange(0, NUM_AGENTS)
+y1_alphagraph = Reverse(extr_of_each_agent_video_all)
+
+
+# plt.scatter(x1_alphagraph,y1_alphagraph, color = 'white') # A bar chart
+# plt.title('Avg. Extremeness of Videos Watched Per Agent', fontsize = 18)
+plt.xlabel('Agents (0 - ' + str(NUM_AGENTS-1) + ')')
+plt.ylabel('Avg. Extremeness')
+# plt.axhline(numpy.nanmean(y), linestyle = '--', color = 'purple')
+
+# defining display layout
+plt.tight_layout()
+
+# plt.xticks(numpy.arange(0, 101, 10))
+# plt.yticks(numpy.arange(0, 1.1, 0.1))
+
+#obtain m (slope) and b(intercept) of linear regression line
+m, b = numpy.polyfit(x1_alphagraph, y1_alphagraph, 1)
+
+#add linear regression line to scatterplot 
+# plt.plot(x, m*x+b, label = "No system", lw = 3)
 
 
 
-plt.scatter(x1,y1, color = 'white') # A bar chart
+if(SCORE_SYSTEM_TOGGLE):
+    
+    x_score1_alphagraph = x_agent_len_thresholds
+    y_score1_alphagraph = y_agent_avg_len_watched
+
+    # plt.scatter(x_score1_alphagraph,y_score1_alphagraph, color = 'white')
+    # plt.title('Avg. Extremeness of Videos Watched Per Agent, w/ Scoring', fontsize = 18)
+    plt.xlabel('Agent Thresholds (minutes)')
+    plt.ylabel('Avg. Length of Video Watched (minutes)')
+
+
+colors = ["red", "coral", "orange", "gold", "yellow", "yellowgreen", "limegreen", "dodgerblue", "royalblue", "mediumpurple", "rebeccapurple"]
+
+if(var_to_test == "gamma"):
+    for g in range(len(gamma_values)):
+        gamma_x = gamma_lines_extr[g][0]
+        gamma_y = gamma_lines_extr[g][1]
+        sns.regplot(x = gamma_x, y = gamma_y, lowess=True, scatter = False, label = gamma_values[g], color = colors[g])
+
+elif(var_to_test == "alpha"):
+    for a in range(len(alpha_values)):
+        alpha_x = alpha_lines_lens[a][0]
+        alpha_y = alpha_lines_lens[a][1]
+        sns.regplot(x = alpha_x, y = alpha_y, lowess=True, scatter = False, label = alpha_values[a], color = colors[a])
+        
+
+elif(var_to_test == "beta"):
+    for b in range(len(beta_values)):
+        beta_x = beta_lines_lens[b][0]
+        beta_y = beta_lines_lens[b][1]
+        sns.regplot(x = beta_x, y = beta_y, lowess=True, scatter = False, label = beta_values[b], color = colors[b])
+
+elif(var_to_test == "delta"):
+    for d in range(len(delta_values)):
+        delta_x = delta_lines_lens[d][0]
+        delta_y = delta_lines_lens[d][1]
+        sns.regplot(x = delta_x, y = delta_y, lowess=True, scatter = False, label = delta_values[d], color = colors[d])
+
+
+
+plt.title('Avg. Len of Videos Watched Per Agent, By Len Threshold, var = ' + var_to_test, fontsize = 18)
+# sns.regplot(x = x1_alphagraph, y = y1_alphagraph, lowess=True, scatter = False, label = "None", line_kws={"color": "midnightblue"})
+# # sns.regplot(x = x_rec, y = y_rec, lowess=True, scatter = False, label = "Rec", line_kws={"color": "royalblue"})
+# # sns.regplot(x = x_rand, y = y_rand, lowess=True, scatter = False, label = "Rand", line_kws={"color": "cornflowerblue"})
+# sns.regplot(x = x_score1_alphagraph, y = y_score1_alphagraph, lowess=True, scatter = False, label = "Score", line_kws={"color": "powderblue"})
+plt.legend(loc='upper right')
+ax = plt.gca()
+leg = ax.get_legend()
+
+plt.show()
+plt.close()
+# END ALPHA GRAPH
+
+
+
+# DELTA GRAPH #
+
+x1_deltagraph = numpy.arange(0, NUM_AGENTS)
+y1_deltagraph = Reverse(extr_of_each_agent_video_all)
+
+# plt.scatter(x1_deltagraph,y1_deltagraph, color = 'white') # A bar chart
 # plt.title('Avg. Extremeness of Videos Watched Per Agent', fontsize = 18)
 plt.xlabel('Agents (0 - ' + str(NUM_AGENTS-1) + ')')
 plt.ylabel('Avg. Extremeness')
@@ -2321,7 +2530,7 @@ plt.xticks(numpy.arange(0, 101, 10))
 plt.yticks(numpy.arange(0, 1.1, 0.1))
 
 #obtain m (slope) and b(intercept) of linear regression line
-m, b = numpy.polyfit(x1, y1, 1)
+m, b = numpy.polyfit(x1_deltagraph, y1_deltagraph, 1)
 
 #add linear regression line to scatterplot 
 # plt.plot(x, m*x+b, label = "No system", lw = 3)
@@ -2330,10 +2539,10 @@ m, b = numpy.polyfit(x1, y1, 1)
 
 if(SCORE_SYSTEM_TOGGLE):
     
-    x_score1 = numpy.arange(0, NUM_AGENTS)
-    y_score1 = Reverse(extr_of_each_agent_video_all_scoring)
+    x_score1_deltagraph = numpy.arange(0, NUM_AGENTS)
+    y_score1_deltagraph = Reverse(extr_of_each_agent_video_all_scoring)
 
-    plt.scatter(x_score1,y_score1, color = 'white')
+    # plt.scatter(x_score1_deltagraph,y_score1_deltagraph, color = 'white')
     # plt.title('Avg. Extremeness of Videos Watched Per Agent, w/ Scoring', fontsize = 18)
     plt.xlabel('Agents (0 - ' + str(NUM_AGENTS-1) + ')')
     plt.ylabel('Avg. Extremeness')
@@ -2350,13 +2559,13 @@ if(SCORE_SYSTEM_TOGGLE):
 
 
     #obtain m (slope) and b(intercept) of linear regression line
-    m_score, b_score = numpy.polyfit(x_score1, y_score1, 1)
+    m_score, b_score = numpy.polyfit(x_score1_deltagraph, y_score1_deltagraph, 1)
 
     #add linear regression line to scatterplot 
     # plt.plot(x_score, m_score*x_score+b_score)
 
 
-# plt.text(0.4, numpy.nanmean(y1)+0.2, "Avg: " + str(numpy.nanmean(y1)), fontsize = 10)
+# plt.text(0.4, numpy.nanmean(y1_deltagraph)+0.2, "Avg: " + str(numpy.nanmean(y1_deltagraph)), fontsize = 10)
 # plt.text(0.4, numpy.nanmean(y_score1)-0.2, "Score Avg: " + str(numpy.nanmean(y_score1)), fontsize = 10)
 
 colors = ["red", "coral", "orange", "gold", "yellow", "yellowgreen", "limegreen", "dodgerblue", "royalblue", "mediumpurple", "rebeccapurple"]
@@ -2389,7 +2598,7 @@ elif(var_to_test == "delta"):
 
 
 plt.title('Avg. Extremeness of Videos Watched Per Agent, By Extremeness, var = ' + var_to_test, fontsize = 18)
-# sns.regplot(x = x1, y = y1, lowess=True, scatter = False, label = "None", line_kws={"color": "midnightblue"})
+# sns.regplot(x = x1_deltagraph, y = y1_deltagraph, lowess=True, scatter = False, label = "None", line_kws={"color": "midnightblue"})
 # # sns.regplot(x = x_rec, y = y_rec, lowess=True, scatter = False, label = "Rec", line_kws={"color": "royalblue"})
 # # sns.regplot(x = x_rand, y = y_rand, lowess=True, scatter = False, label = "Rand", line_kws={"color": "cornflowerblue"})
 # sns.regplot(x = x_score1, y = y_score1, lowess=True, scatter = False, label = "Score", line_kws={"color": "powderblue"})
@@ -2398,17 +2607,105 @@ ax = plt.gca()
 leg = ax.get_legend()
 
 plt.show()
+plt.close()
+
+# END DELTA GRAPH #
+
+
 
 
 
 ## TODO: instead of plots, do sublots (2x3), 2 rows 3 columns
 
 
-## END AVG EXTREMENESS PER AGENT ###############################################
+## END AVG EXTREMENESS PER AGENT ALL ###############################################
 
 
 
 ### AVG EXTREMENESS ################################################################
+
+
+# Avg. Extremeness Per Agent, Scatter Plot
+
+
+# import matplotlib as matplotlib
+# import numpy as np
+# import pandas as pd
+
+x = Reverse(agent_extremeness_array)
+y = Reverse(extr_of_each_agent_video_all)
+
+
+# plt.scatter(x,y, color = 'midnightblue') # A bar chart
+# plt.title('Avg. Extremeness of Videos Watched Per Agent, by Extremeness', fontsize = 18)
+# plt.xlabel('Agents by Extremeness')
+# plt.ylabel('Avg. Extremeness')
+# # plt.axhline(numpy.nanmean(y), linestyle = '--', color = 'purple')
+
+# # defining display layout
+# plt.tight_layout()
+
+# # plt.xticks(numpy.arange(0, 101, 10))
+# plt.yticks(numpy.arange(0, 1.1, 0.1))
+
+# #obtain m (slope) and b(intercept) of linear regression line
+# m, b = numpy.polyfit(x, y, 1)
+
+# #add linear regression line to scatterplot 
+# # plt.plot(x, m*x+b, label = "No system", lw = 3)
+
+# plt.show()
+
+
+if(SCORE_SYSTEM_TOGGLE):
+    
+    x_score = Reverse(agent_extremeness_array_scoring)
+    y_score = Reverse(extr_of_each_agent_video_all_scoring)
+
+    plt.scatter(x_score,y_score, color = 'cornflowerblue')
+    plt.title('Avg. Extremeness of Videos Watched Per Agent, w/ Scoring, By Extremeness', fontsize = 18)
+    plt.xlabel('Agents by Extremeness')
+    plt.ylabel('Avg. Extremeness')
+
+    
+    # plt.axhline(numpy.nanmean(y), linestyle = '--', color = 'green')
+
+    # defining display layout
+    plt.tight_layout()
+
+    # plt.xticks(numpy.arange(0, 101, 10))
+    plt.yticks(numpy.arange(0, 1.1, 0.1))
+
+
+
+    #obtain m (slope) and b(intercept) of linear regression line
+    m_score, b_score = numpy.polyfit(x_score, y_score, 1)
+
+    #add linear regression line to scatterplot 
+    # plt.plot(x_score, m_score*x_score+b_score)
+
+
+    plt.show()
+
+
+
+
+
+plt.title('Avg. Extremeness of Videos Watched Per Agent', fontsize = 18)
+sns.regplot(x = x, y = y, lowess=True, scatter = False, label = "None", line_kws={"color": "midnightblue"})
+# sns.regplot(x = x_rec, y = y_rec, lowess=True, scatter = False, label = "Rec", line_kws={"color": "royalblue"})
+# sns.regplot(x = x_rand, y = y_rand, lowess=True, scatter = False, label = "Rand", line_kws={"color": "cornflowerblue"})
+sns.regplot(x = x_score, y = y_score, lowess=True, scatter = False, label = "Score", line_kws={"color": "powderblue"})
+plt.text(0.6, numpy.nanmean(y)-0.1, "Avg: " + str(numpy.nanmean(y)), fontsize = 10)
+plt.text(0.4, numpy.nanmean(y_score)+0.2, "Score Avg: " + str(numpy.nanmean(y_score)), fontsize = 10)
+plt.legend(labels=['None', 'Rec', 'Rand', 'Score'])
+
+plt.show()
+plt.close()
+
+
+
+
 # %% [markdown]
 # Avg. Extremeness of Videos Watched Per Agent Regression
 
@@ -2420,7 +2717,7 @@ y1 = Reverse(extr_of_each_agent_video_all)
 
 
 
-plt.scatter(x1,y1, color = 'white') # A bar chart
+# plt.scatter(x1,y1, color = 'white') # A bar chart
 # plt.title('Avg. Extremeness of Videos Watched Per Agent', fontsize = 18)
 plt.xlabel('Agents (0 - ' + str(NUM_AGENTS-1) + ')')
 plt.ylabel('Avg. Extremeness')
@@ -2445,7 +2742,7 @@ if(SCORE_SYSTEM_TOGGLE):
     x_score1 = numpy.arange(0, NUM_AGENTS)
     y_score1 = Reverse(extr_of_each_agent_video_all_scoring)
 
-    plt.scatter(x_score1,y_score1, color = 'white')
+    # plt.scatter(x_score1,y_score1, color = 'white')
     # plt.title('Avg. Extremeness of Videos Watched Per Agent, w/ Scoring', fontsize = 18)
     plt.xlabel('Agents (0 - ' + str(NUM_AGENTS-1) + ')')
     plt.ylabel('Avg. Extremeness')
@@ -2509,10 +2806,10 @@ y2 = Reverse(agent_minutes_watched_today_array)
 # x axis = agents (0-199), y axis = minutes watched per agent
 
 
-plt.scatter(x2,y2, color = 'white') # A bar chart
-plt.title('Minutes Watched Per Agent', fontsize = 18)
-plt.xlabel('Agent Extremeness')
-plt.ylabel('Minutes Watched')
+# plt.scatter(x2,y2, color = 'white') # A bar chart
+# plt.title('Minutes Watched Per Agent', fontsize = 18)
+# plt.xlabel('Agent Extremeness')
+# plt.ylabel('Minutes Watched')
 # plt.axhline(numpy.nanmean(y), linestyle = '--', color = 'blue')
 # plt.text(0.4, numpy.nanmean(y)+ 100, "Avg: " + str(numpy.nanmean(y)), fontsize = 10)
 
@@ -2533,10 +2830,10 @@ if(SCORE_SYSTEM_TOGGLE):
         # x axis = agents (0-199), y axis = minutes watched per agent
 
 
-        plt.scatter(x_score2,y_score2, color = 'white') # A bar chart
-        plt.title('Minutes Watched Per Agent, w/ Scoring', fontsize = 18)
-        plt.xlabel('Agent Extremeness')
-        plt.ylabel('Minutes Watched')
+        # plt.scatter(x_score2,y_score2, color = 'white') # A bar chart
+        # plt.title('Minutes Watched Per Agent, w/ Scoring', fontsize = 18)
+        # plt.xlabel('Agent Extremeness')
+        # plt.ylabel('Minutes Watched')
         # plt.axhline(numpy.nanmean(y_score), linestyle = '--', color = 'blue')
         # plt.text(0.4, numpy.nanmean(y_score)+ 100, "Avg: " + str(numpy.nanmean(y_score)), fontsize = 10)
 
@@ -2605,10 +2902,10 @@ if(SCORE_SYSTEM_TOGGLE):
     x_score3 = Reverse(agent_extremeness_array_scoring)
     y_score3 = Reverse(agent_vids_watched_today_array_scoring)
 
-    plt.scatter(x_score3,y_score3, color = 'white') # A bar chart
-    plt.title('Videos Watched Per Agent, w/ Scoring, by Extr', fontsize = 18)
-    plt.xlabel('Agent Extremeness')
-    plt.ylabel('# of Videos Watched')
+    # plt.scatter(x_score3,y_score3, color = 'white') # A bar chart
+    # plt.title('Videos Watched Per Agent, w/ Scoring, by Extr', fontsize = 18)
+    # plt.xlabel('Agent Extremeness')
+    # plt.ylabel('# of Videos Watched')
     # plt.axhline(numpy.nanmean(y_score3), linestyle = '--', color = 'hotpink')
 
     # defining display layout
