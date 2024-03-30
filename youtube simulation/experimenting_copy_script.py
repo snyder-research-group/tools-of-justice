@@ -2764,7 +2764,7 @@ y = Reverse(extr_of_each_agent_video_all)
 # # plt.axhline(numpy.nanmean(y), linestyle = '--', color = 'purple')
 
 # # defining display layout
-# plt.tight_layout()
+plt.tight_layout()
 
 # # plt.xticks(numpy.arange(0, 101, 10))
 # plt.yticks(numpy.arange(0, 1.1, 0.1))
@@ -2807,19 +2807,30 @@ if(SCORE_SYSTEM_TOGGLE):
 
 
     plt.show()
+    plt.close()
 
 
 
 
 
 plt.title('Avg. Extremeness of Videos Watched Per Agent', fontsize = 18)
-sns.regplot(x = x, y = y, lowess=True, scatter = False, label = "None", line_kws={"color": "midnightblue"})
+# sns.regplot(x = x, y = y, lowess=True, scatter = False, label = "None", line_kws={"color": "darkgreen"})
 # sns.regplot(x = x_rec, y = y_rec, lowess=True, scatter = False, label = "Rec", line_kws={"color": "royalblue"})
 # sns.regplot(x = x_rand, y = y_rand, lowess=True, scatter = False, label = "Rand", line_kws={"color": "cornflowerblue"})
-sns.regplot(x = x_score, y = y_score, lowess=True, scatter = False, label = "Score", line_kws={"color": "powderblue"})
-plt.text(0.6, numpy.nanmean(y)-0.1, "Avg: " + str(numpy.nanmean(y)), fontsize = 10)
-plt.text(0.4, numpy.nanmean(y_score)+0.2, "Score Avg: " + str(numpy.nanmean(y_score)), fontsize = 10)
-plt.legend(labels=['None', 'Rec', 'Rand', 'Score'])
+# sns.regplot(x = x_score, y = y_score, lowess=True, scatter = False, label = "Score", line_kws={"color": "greenyellow"})
+# plt.text(0.6, numpy.nanmean(y)-0.1, "Avg: " + str(numpy.nanmean(y)), fontsize = 10)
+# plt.text(0.4, numpy.nanmean(y_score)+0.2, "Score Avg: " + str(numpy.nanmean(y_score)), fontsize = 10)
+    
+plt.scatter(x,y, color = 'darkgreen')
+plt.scatter(x_score,y_score, color = 'yellowgreen')
+
+plt.legend(labels=['None', 'Score'])
+
+plt.xticks(numpy.arange(0, 1.1, 0.1))
+plt.yticks(numpy.arange(0, 1.1, 0.1))
+
+plt.xlabel('Agent Extremeness')
+plt.ylabel('Minutes Watched')
 
 plt.show()
 plt.close()
@@ -2833,7 +2844,7 @@ plt.close()
 import matplotlib as matplotlib
 import pandas as pd
 
-x1 = numpy.arange(0, NUM_AGENTS)
+x1 = Reverse(agent_extremeness_array)
 y1 = Reverse(extr_of_each_agent_video_all)
 
 
@@ -2860,7 +2871,7 @@ m, b = numpy.polyfit(x1, y1, 1)
 
 if(SCORE_SYSTEM_TOGGLE):
     
-    x_score1 = numpy.arange(0, NUM_AGENTS)
+    x_score1 = Reverse(agent_extremeness_array_scoring)
     y_score1 = Reverse(extr_of_each_agent_video_all_scoring)
 
     # plt.scatter(x_score1,y_score1, color = 'white')
@@ -2891,19 +2902,44 @@ plt.text(0.4, numpy.nanmean(y_score1)-0.2, "Score Avg: " + str(numpy.nanmean(y_s
 
 
 
-plt.title('Avg. Extremeness of Videos Watched Per Agent, By Extremeness', fontsize = 18)
-sns.regplot(x = x1, y = y1, lowess=True, scatter = False, label = "None", line_kws={"color": "midnightblue"})
+plt.title('Avg. Extremeness of Videos Watched Per Agent', fontsize = 18)
+
+
+
+sns.regplot(x = x1, y = y1, lowess=True, scatter = False, label = "None", line_kws={"color": "darkgreen"})
 # sns.regplot(x = x_rec, y = y_rec, lowess=True, scatter = False, label = "Rec", line_kws={"color": "royalblue"})
 # sns.regplot(x = x_rand, y = y_rand, lowess=True, scatter = False, label = "Rand", line_kws={"color": "cornflowerblue"})
-sns.regplot(x = x_score1, y = y_score1, lowess=True, scatter = False, label = "Score", line_kws={"color": "powderblue"})
+sns.regplot(x = x_score1, y = y_score1, lowess=True, scatter = False, label = "Score", line_kws={"color": "yellowgreen"})
+
+plt.xlabel('Agents by Extremeness (0.0 - 1.0)')
+
 plt.legend(labels=['None', 'Score'])
-ax = plt.gca()
-leg = ax.get_legend()
-leg.legendHandles[0].set_color('midnightblue')
-leg.legendHandles[1].set_color('powderblue')
+plt.text(0.3, 0.3, "Score Average: " + str(round(numpy.nanmean(y_score1), 2)), size=10, rotation=0.,
+        ha="center", va="center",
+        bbox=dict(boxstyle="round",
+                ec='yellowgreen',   # edge color: rbg values
+                fc='mintcream',   # fill color: rbg values
+                )
+        )
+
+plt.text(0.75, 0.57, "Average: " + str(round(numpy.nanmean(y1),2)), size=10, rotation=0.,
+         ha="center", va="center",
+         bbox=dict(boxstyle="round",
+                   ec='darkgreen',   # edge color: rbg values
+                   fc='mintcream',   # fill color: rbg values
+                   )
+         )
+
+
+plt.legend(labels=['No system', 'Scoring system'])
+plt.xticks(numpy.arange(0, 1.1, 0.1))
+plt.yticks(numpy.arange(0, 1.1, 0.1))
+# leg.legendHandles[0].set_color('darkgreen')
+# leg.legendHandles[1].set_color('yellowgreen')
+
 
 plt.show()
-
+plt.close()
 
 ## END AVG EXTREMENESS PER AGENT ###############################################
 
@@ -3074,63 +3110,173 @@ plt.close() # clear the plot
 import matplotlib as matplotlib
 
 x4 = Reverse(agent_extremeness_array)
-
 y4 = Reverse(agent_vids_watched_today_array)
 
+x_score4 = Reverse(agent_extremeness_array_scoring)
+y_score4 = Reverse(agent_vids_watched_today_array_scoring)
 # Let's graph each agent with how much they watched per day.
 # x axis = agents (0-199), y axis = minutes watched per agent
 
 
-# plt.scatter(x4,y4, color = 'white') # A bar chart
-# plt.title('# of Videos Watched Per Agent, By Extremeness', fontsize = 18)
-plt.xlabel('Agent Extremeness')
-plt.ylabel('Minutes Watched')
 
+# Let's graph each agent with how many videos they watched per day.
+# x axis = agents (0-99), y axis = videos watched per agent
+
+plt.scatter(x4,y4, color = 'darkgreen') # A bar chart
+plt.title('Videos Watched Per Agent', fontsize = 18)
+plt.xlabel('Agent Extremeness (0.0 - 1.0)')
+plt.ylabel('Videos Watched')
+plt.axhline(numpy.nanmean(y4), linestyle = '--', color = 'green')
 
 # defining display layout
-# plt.tight_layout()
+plt.tight_layout()
 
-plt.yticks(numpy.arange(0, 8, 0.5))
-
-
-if(SCORE_SYSTEM_TOGGLE):
-    # Reversing the arrays so extremenesses are in ascending order
-        x_score4 = Reverse(agent_extremeness_array_scoring)
-        y_score4 = Reverse(agent_vids_watched_today_array_scoring)
+# Sets y-axis range from min in the array to 20, with intervals of 2
+plt.yticks(numpy.arange(min(y4), 20, 2))
 
 
-        # Let's graph each agent with how much they watched per day.
-        # x axis = agents (0-199), y axis = minutes watched per agent
-
-
-        # plt.scatter(x_score4,y_score4, color = 'white') # A bar chart
-        # plt.title('# of Videos Watched Per Agent, w/ Scoring, By Extremeness', fontsize = 18)
-        plt.xlabel('Agent Extremeness')
-        plt.ylabel('Minutes Watched')
-
-
-
-        # defining display layout
-        # plt.tight_layout()
-
-        plt.yticks(numpy.arange(0, 8, 0.5))
-        
-
-
-plt.title('# of Videos Watched Per Agent, By Extremeness', fontsize = 18)
-sns.regplot(x = x4, y = y4, lowess=True, scatter = False, label = "None", line_kws={"color": "midnightblue"})
-# sns.regplot(x = x_rec, y = y_rec, lowess=True, scatter = False, label = "Rec", line_kws={"color": "royalblue"})
-# sns.regplot(x = x_rand, y = y_rand, lowess=True, scatter = False, label = "Rand", line_kws={"color": "cornflowerblue"})
-sns.regplot(x = x_score4, y = y_score4, lowess=True, scatter = False, label = "Score", line_kws={"color": "powderblue"})
-plt.text(0.4, numpy.nanmean(y4)-0.25, "Avg: " + str(numpy.nanmean(y4)), fontsize = 10)
-plt.text(0.4, 4, "Score Avg: " + str(numpy.nanmean(y_score4)), fontsize = 10)
-plt.legend(labels=['None', 'Score'])
-ax = plt.gca()
-leg = ax.get_legend()
-leg.legendHandles[0].set_color('midnightblue')
-leg.legendHandles[1].set_color('powderblue')
+plt.text(0.5, numpy.nanmean(y4) + 1, "Average: " + str(numpy.nanmean(y4)), size=10, rotation=0.,
+         ha="center", va="center",
+         bbox=dict(boxstyle="round",
+                   ec='darkgreen',   # edge color: rbg values
+                   fc='mintcream',   # fill color: rbg values
+                   )
+         )
 
 plt.show()
 plt.close()
+
+
+
+
+if(SCORE_SYSTEM_TOGGLE):
+
+    plt.scatter(x_score4,y_score4, color = 'yellowgreen') # A bar chart
+    plt.title('Videos Watched Per Agent, w/ Scoring', fontsize = 18)
+    plt.xlabel('Agent Extremeness (0.0 - 1.0)')
+    plt.ylabel('Videos Watched')
+    plt.axhline(numpy.nanmean(y_score4), linestyle = '--', color = 'green')
+
+    # defining display layout
+    plt.tight_layout()
+
+    # Sets y-axis range from min in the array to 20, with intervals of 2
+    plt.yticks(numpy.arange(min(y_score4), 20, 2))
+
+    plt.text(0.5, numpy.nanmean(y_score4) + 1, "Average: " + str(numpy.nanmean(y_score4)), size=10, rotation=0.,
+            ha="center", va="center",
+            bbox=dict(boxstyle="round",
+                    ec='darkgreen',   # edge color: rbg values
+                    fc='mintcream',   # fill color: rbg values
+                    )
+            )
+
+    plt.show()
+    plt.close()
+
+
+
+
+plt.title('Number of Videos Watched Per Agent', fontsize = 18)
+plt.yticks(numpy.arange(0, 10, 0.5))
+sns.regplot(x = x4, y = y4, lowess=True, scatter = False, label = "None", line_kws={"color": "darkgreen"})
+sns.regplot(x = x_score4, y = y_score4, lowess=True, scatter = False, label = "Score", line_kws={"color": "yellowgreen"})
+plt.text(0.5, 4.5, "Score Average: " + str(numpy.nanmean(y_score4)), size=10, rotation=0.,
+        ha="center", va="center",
+        bbox=dict(boxstyle="round",
+                ec='yellowgreen',   # edge color: rbg values
+                fc='mintcream',   # fill color: rbg values
+                )
+        )
+
+plt.text(0.5, 2.7, "Average: " + str(numpy.nanmean(y4)), size=10, rotation=0.,
+         ha="center", va="center",
+         bbox=dict(boxstyle="round",
+                   ec='darkgreen',   # edge color: rbg values
+                   fc='mintcream',   # fill color: rbg values
+                   )
+         )
+
+plt.legend(labels=['No system', 'Scoring system'])
+plt.xlabel("Agent's Extremeness")
+plt.ylabel('Number of Videos Watched')
+# ax = plt.gca()
+# leg = ax.get_legend()
+# leg.legendHandles[0].set_color('darkgreen')
+# leg.legendHandles[1].set_color('yellowgreen')
+plt.show()
+plt.close()
+
+
+
+# Let's graph each agent with how many videos they watched per day.
+# x axis = agents (0-99), y axis = videos watched per agent
+
+plt.scatter(x4,y4, color = 'darkgreen') # A bar chart
+plt.title('Videos Watched Per Agent', fontsize = 18)
+plt.xlabel('Agents (0 - ' + str(NUM_AGENTS-1) + ')')
+plt.ylabel('Videos Watched')
+plt.axhline(numpy.nanmean(y4), linestyle = '--', color = 'green')
+
+# defining display layout
+plt.tight_layout()
+
+# Sets y-axis range from min in the array to 20, with intervals of 2
+plt.yticks(numpy.arange(min(y4), 20, 2))
+
+
+plt.text(50, numpy.nanmean(y4) + 1, "Average: " + str(numpy.nanmean(y4)), size=10, rotation=0.,
+         ha="center", va="center",
+         bbox=dict(boxstyle="round",
+                   ec='darkgreen',   # edge color: rbg values
+                   fc='mintcream',   # fill color: rbg values
+                   )
+         )
+
+plt.show()
+plt.close()
+
+
+
+if(SCORE_SYSTEM_TOGGLE):
+
+    plt.scatter(x_score4,y_score4, color = 'yellowgreen') # A bar chart
+    plt.title('Videos Watched Per Agent, w/ Scoring', fontsize = 18)
+    plt.xlabel('Agents (0 - ' + str(NUM_AGENTS-1) + ')')
+    plt.ylabel('Videos Watched')
+    plt.axhline(numpy.nanmean(y_score4), linestyle = '--', color = 'green')
+
+    # defining display layout
+    plt.tight_layout()
+
+    # Sets y-axis range from min in the array to 20, with intervals of 2
+    plt.yticks(numpy.arange(min(y_score4), 20, 2))
+
+    plt.text(50, numpy.nanmean(y_score4) + 1, "Average: " + str(numpy.nanmean(y_score4)), size=10, rotation=0.,
+            ha="center", va="center",
+            bbox=dict(boxstyle="round",
+                    ec='darkgreen',   # edge color: rbg values
+                    fc='mintcream',   # fill color: rbg values
+                    )
+            )
+
+    plt.show()
+    plt.close()
+
+
+
+plt.title('# of Videos Watched Per Agent', fontsize = 18)
+sns.regplot(x = x4, y = y4, lowess=True, scatter = False, label = "None", line_kws={"color": "midnightblue"})
+sns.regplot(x = x_score4, y = y_score4, lowess=True, scatter = False, label = "Score", line_kws={"color": "powderblue"})
+ax = plt.gca()
+# leg = ax.get_legend()
+# leg.legendHandles[0].set_color('darkgreen')
+# leg.legendHandles[1].set_color('yellowgreen')
+plt.show()
+plt.close()
+
+
+
+
 
 ## END MINUTES WATCHED #################################################
