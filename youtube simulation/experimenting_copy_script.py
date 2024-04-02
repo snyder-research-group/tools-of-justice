@@ -2481,8 +2481,6 @@ elif(var_to_test == "delta"):
 # %% [markdown]
 # Avg. Extremeness of Videos Watched Per Agent Regression
 
-
-
 # ALPHA GRAPH
 import matplotlib as matplotlib
 import pandas as pd
